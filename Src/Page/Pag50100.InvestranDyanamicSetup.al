@@ -4,7 +4,7 @@ page 50100 "Investran - Dyanamic Setup"
     Caption = 'Investran Dyanamic Setup';
     PageType = Card;
     SourceTable = "Investran - Dyanamic Setup";
-    UsageCategory = Documents;
+    UsageCategory = Administration;
 
     layout
     {
@@ -33,7 +33,57 @@ page 50100 "Investran - Dyanamic Setup"
                     ToolTip = 'Specifies the value of the Investran Entity Active field.';
                     ApplicationArea = All;
                 }
+
+            }
+            group("Azure Function Setup")
+            {
+                field("Azure Function Endpoint"; Rec."Azure Function endpoint")
+                {
+                    ApplicationArea = All;
+                }
+                field("Authentication Code"; Rec."Authentication Code")
+                {
+                    ApplicationArea = All;
+                    ExtendedDatatype = Masked;
+                }
+                field(Host; Rec.Host)
+                {
+                    ApplicationArea = All;
+                    ExtendedDatatype = Masked;
+                }
+                field(Username; Rec.Username)
+                {
+                    ApplicationArea = All;
+                    ToolTip = 'Specifies the value of the Username field.';
+                    ExtendedDatatype = Masked;
+                }
+                field(Password; Rec.Password)
+                {
+                    ApplicationArea = All;
+                    ToolTip = 'Specifies the value of the Password field.';
+                    ExtendedDatatype = Masked;
+                }
+                field("Remote Folder"; Rec."Remote Folder")
+                {
+                    ApplicationArea = All;
+                    ToolTip = 'Specifies the value of the Remote Folder field.';
+                }
+                field(Filename; Rec.Filename)
+                {
+                    ApplicationArea = All;
+                    ToolTip = 'Specifies the value of the Filename field.';
+                }
+
             }
         }
     }
+    trigger OnOpenPage()
+    var
+    begin
+        Rec.Reset;
+        if not Rec.Get then begin
+            Rec.Init;
+            Rec.Insert;
+        end;
+    end;
 }

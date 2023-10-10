@@ -30,6 +30,38 @@ table 50100 "Investran - Dyanamic Setup"
             Caption = 'Investran Entity Active';
             DataClassification = ToBeClassified;
         }
+        field(6; "Azure Function endpoint"; Text[250])
+        {
+            DataClassification = ToBeClassified;
+        }
+        field(7; "Host"; Text[100])
+        {
+            DataClassification = ToBeClassified;
+            ExtendedDatatype = Masked;
+        }
+        field(8; "Username"; Text[100])
+        {
+            DataClassification = ToBeClassified;
+            ExtendedDatatype = Masked;
+        }
+        field(9; "Password"; Text[100])
+        {
+            DataClassification = ToBeClassified;
+            ExtendedDatatype = Masked;
+        }
+        field(10; "Remote Folder"; Text[100])
+        {
+            DataClassification = ToBeClassified;
+        }
+        field(11; "Filename"; Text[100])
+        {
+            DataClassification = ToBeClassified;
+        }
+        field(12; "Authentication Code"; Text[250])
+        {
+            DataClassification = ToBeClassified;
+            ExtendedDatatype = Masked;
+        }
     }
     keys
     {
