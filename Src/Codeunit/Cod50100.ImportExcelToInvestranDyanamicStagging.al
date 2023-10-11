@@ -9,7 +9,6 @@ codeunit 50100 "Import Investran File"
             UploadIntoStream(UploadExcelMsg, '', '', FromFile, Instream);
             if FromFile <> '' then begin
                 FileName := FileMgmt.GetFileName(FromFile);
-                SheetName := TempExcelBuffer.SelectSheetsNameStream(Instream);
             end else
                 Error(NoFileFoundMsg);
         end;
@@ -19,6 +18,7 @@ codeunit 50100 "Import Investran File"
 
     internal procedure ReadExcelSheet(var Instream: InStream)
     begin
+        SheetName := TempExcelBuffer.SelectSheetsNameStream(Instream);
         TempExcelBuffer.Reset();
         TempExcelBuffer.DeleteAll();
         TempExcelBuffer.OpenBookStream(Instream, SheetName);

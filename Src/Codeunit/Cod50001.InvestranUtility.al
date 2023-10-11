@@ -28,15 +28,17 @@ codeunit 50001 InvestranUtility
         Clear(AzureFunction);
         if AzureFunction.Run() then begin
             if AzureFunction.IsSuccessCall() then begin
+                //Message('API response: %1', AzureFunction.GetResponse());
+                ModifyLog(LogEntryNumber, false, CopyStr(AzureFunction.GetResponse(), 1, 500), true, true);
                 TempBlob.CreateOutStream(Outstream);
                 Base64Convert.FromBase64(AzureFunction.GetResponse(), Outstream);
                 TempBlob.CreateInStream(Instream);
-                ModifyLog(LogEntryNumber, false, '', true, true);
+                ModifyLog(LogEntryNumber, false, CopyStr(AzureFunction.GetResponse(), 1, 500), true, true);
                 //-importing file in BC
                 ClearLastError();
                 ImportFileINBC.SetValue(true, Instream, true);
                 if ImportFileINBC.Run() then begin
-                    ModifyLog(LogEntryNumber, true, '', true, true);
+                    ModifyLog(LogEntryNumber, true, CopyStr(AzureFunction.GetResponse(), 1, 500), true, true);
                     Message('File has been successfully fetched from SFTP & imported in Business Central');
                 end else begin
                     ModifyLog(LogEntryNumber, false, CopyStr(GetLastErrorText(), 1, 500), true, true);
@@ -44,7 +46,7 @@ codeunit 50001 InvestranUtility
                 //-end
                 // DownloadFromStream(Instream, '', '', '', IntegrationSetup.Filename);
             end else begin
-                ModifyLog(LogEntryNumber, false, AzureFunction.GetResponse(), false, true);
+                ModifyLog(LogEntryNumber, false, CopyStr(AzureFunction.GetResponse(), 1, 500), false, true);
                 Message('Status:Failed \Response:%1', CopyStr(AzureFunction.GetResponse(), 1, 500));
             end;
 
@@ -71,8 +73,8 @@ codeunit 50001 InvestranUtility
         SFTPLog."Error Remarks" := '';
         SFTPLog."Action Performed ON" := Today();
         SFTPLog.Modify(true);
-        exit(SFTPLog."Entry No.");
         Commit();
+        exit(SFTPLog."Entry No.");
     end;
 
     local procedure ModifyLog(EntryNumber: Integer; Imported: Boolean; ErrorRemarks: Text; FIleReceived: Boolean; usecommit: Boolean)
@@ -96,7 +98,7 @@ codeunit 50001 InvestranUtility
         SFTPLog.SetRange("Action Performed ON", Today());
         SFTPLog.SetRange("Successfully Imported", true);
         SFTPLog.SetRange("File Received From SFTP", true);
-        SFTPLog.SetFilter("Error Remarks", '=%1', '');
+        //SFTPLog.SetFilter("Error Remarks", '=%1', '');
         if SFTPLog.FindFirst() then
             Error('Import action has been already performed by UserId: %1, at: %2', SFTPLog."Action Performed By", SFTPLog."Action Performed At");
     end;

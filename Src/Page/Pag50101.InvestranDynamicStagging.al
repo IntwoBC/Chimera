@@ -110,9 +110,9 @@ page 50101 "Investran Dynamic Stagging"
                     CreateGeneralJournal.Run();
                 end;
             }
-            action("Download Files From SFTP")
+            action("Import File From SFTP")
             {
-                Caption = 'Download Files SFTP';
+                Caption = 'Import File From SFTP';
                 ApplicationArea = All;
                 Image = Journal;
                 Promoted = true;
@@ -120,26 +120,9 @@ page 50101 "Investran Dynamic Stagging"
                 PromotedOnly = true;
                 trigger OnAction()
                 var
-                    AzureFunction: Codeunit AzureFunctionIntegration;
-                    IntSetup: Record "Investran - Dyanamic Setup";
-                    Base64Convert: Codeunit "Base64 Convert";
-                    TempBlob: Codeunit "Temp Blob";
-                    Outstream: OutStream;
-                    Instream: InStream;
+                    Utility: Codeunit InvestranUtility;
                 begin
-                    Clear(AzureFunction);
-                    IntSetup.GET;
-                    if AzureFunction.Run() then begin
-                        if AzureFunction.IsSuccessCall() then begin
-                            TempBlob.CreateOutStream(Outstream);
-                            Base64Convert.FromBase64(AzureFunction.GetResponse(), Outstream);
-                            TempBlob.CreateInStream(Instream);
-                            DownloadFromStream(Instream, '', '', '', IntSetup.Filename);
-                        end else
-                            Message('Status:Failed \Response:%1', AzureFunction.GetResponse());
-                    end else
-                        Message('Something went wront while connecting Azure FUnction. \Response:%1', AzureFunction.GetResponse());
-
+                    Utility.ImportFileFromSFTPLocation(Rec);
                 end;
             }
         }
