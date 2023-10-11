@@ -11,6 +11,7 @@ codeunit 50001 InvestranUtility
         Instream: InStream;
         LogEntryNumber: Integer;
         ImportFileINBC: Codeunit "Import Investran File";
+        ResponseText: Text;
     begin
         if not Confirm('Do you want to import csv file from SFTP?', false) then exit;
 
@@ -27,18 +28,18 @@ codeunit 50001 InvestranUtility
         ClearLastError();
         Clear(AzureFunction);
         if AzureFunction.Run() then begin
+            ResponseText := AzureFunction.GetResponse();
             if AzureFunction.IsSuccessCall() then begin
-                //Message('API response: %1', AzureFunction.GetResponse());
-                ModifyLog(LogEntryNumber, false, CopyStr(AzureFunction.GetResponse(), 1, 500), true, true);
+                ModifyLog(LogEntryNumber, false, CopyStr(ResponseText, 1, 500), true, true);
                 TempBlob.CreateOutStream(Outstream);
-                Base64Convert.FromBase64(AzureFunction.GetResponse(), Outstream);
+                Base64Convert.FromBase64(ResponseText, Outstream);
                 TempBlob.CreateInStream(Instream);
-                ModifyLog(LogEntryNumber, false, CopyStr(AzureFunction.GetResponse(), 1, 500), true, true);
+                ModifyLog(LogEntryNumber, false, CopyStr(ResponseText, 1, 500), true, true);
                 //-importing file in BC
                 ClearLastError();
                 ImportFileINBC.SetValue(true, Instream, true);
                 if ImportFileINBC.Run() then begin
-                    ModifyLog(LogEntryNumber, true, CopyStr(AzureFunction.GetResponse(), 1, 500), true, true);
+                    ModifyLog(LogEntryNumber, true, CopyStr(ResponseText, 1, 500), true, true);
                     Message('File has been successfully fetched from SFTP & imported in Business Central');
                 end else begin
                     ModifyLog(LogEntryNumber, false, CopyStr(GetLastErrorText(), 1, 500), true, true);
@@ -46,8 +47,8 @@ codeunit 50001 InvestranUtility
                 //-end
                 // DownloadFromStream(Instream, '', '', '', IntegrationSetup.Filename);
             end else begin
-                ModifyLog(LogEntryNumber, false, CopyStr(AzureFunction.GetResponse(), 1, 500), false, true);
-                Message('Status:Failed \Response:%1', CopyStr(AzureFunction.GetResponse(), 1, 500));
+                ModifyLog(LogEntryNumber, false, CopyStr(ResponseText, 1, 500), false, true);
+                Message('Status:Failed \Response:%1', CopyStr(ResponseText, 1, 500));
             end;
 
         end else begin
