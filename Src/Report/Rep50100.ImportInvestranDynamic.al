@@ -8,7 +8,7 @@ report 50000 "Import Investran Dynamic"
 
     trigger OnPostReport()
     var
-        ImportExcelInvestranDynamicL: Codeunit "Investran - Dyanamic";
+        ImportExcelInvestranDynamicL: Codeunit "Import Investran File";
     begin
         ImportExcelInvestranDynamicL.Run();
     end;

@@ -85,9 +85,12 @@ page 50101 "Investran Dynamic Stagging"
                 Caption = 'Import Investran Dynamic';
                 ApplicationArea = All;
                 Image = Import;
+                Promoted = true;
+                PromotedCategory = Process;
+                PromotedOnly = true;
                 trigger OnAction()
                 var
-                    Import: Codeunit "Investran - Dyanamic";
+                    Import: Codeunit "Import Investran File";
                 begin
                     Import.Run();
                 end;
@@ -97,6 +100,9 @@ page 50101 "Investran Dynamic Stagging"
                 Caption = 'Process General Journal';
                 ApplicationArea = All;
                 Image = Journal;
+                Promoted = true;
+                PromotedCategory = Process;
+                PromotedOnly = true;
                 trigger OnAction()
                 var
                     CreateGeneralJournal: Codeunit CreateGeneralJournal;
@@ -109,6 +115,9 @@ page 50101 "Investran Dynamic Stagging"
                 Caption = 'Download Files SFTP';
                 ApplicationArea = All;
                 Image = Journal;
+                Promoted = true;
+                PromotedCategory = Process;
+                PromotedOnly = true;
                 trigger OnAction()
                 var
                     AzureFunction: Codeunit AzureFunctionIntegration;

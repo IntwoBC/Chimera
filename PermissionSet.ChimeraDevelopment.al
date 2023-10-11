@@ -8,7 +8,7 @@ permissionset 50000 "Chimera Development"
         table "Investran - Dyanamic Setup" = X,
         tabledata "Investran - Dyanamic Setup" = RMID,
         codeunit CreateGeneralJournal = X,
-        codeunit "Investran - Dyanamic" = X,
+        codeunit "Import Investran File" = X,
         codeunit AzureFunctionIntegration = X,
         page "Investran - Dyanamic Setup" = X,
         page "Investran Dynamic Stagging" = X,

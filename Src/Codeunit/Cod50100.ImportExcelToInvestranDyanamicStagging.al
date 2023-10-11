@@ -1,28 +1,29 @@
-codeunit 50100 "Investran - Dyanamic"
+codeunit 50100 "Import Investran File"
 {
     trigger OnRun()
-    begin
-        ReadExcelSheet();
-        ImportExcelData();
-    end;
-
-    local procedure ReadExcelSheet()
     var
         FileMgmt: Codeunit "File Management";
-        Instream: InStream;
         FromFile: Text[200];
     begin
-        UploadIntoStream(UploadExcelMsg, '', '', FromFile, Instream);
-        if FromFile <> '' then begin
-            FileName := FileMgmt.GetFileName(FromFile);
-            SheetName := TempExcelBuffer.SelectSheetsNameStream(Instream);
-        end else
-            Error(NoFileFoundMsg);
+        if not CallingFromSFT then begin
+            UploadIntoStream(UploadExcelMsg, '', '', FromFile, Instream);
+            if FromFile <> '' then begin
+                FileName := FileMgmt.GetFileName(FromFile);
+                SheetName := TempExcelBuffer.SelectSheetsNameStream(Instream);
+            end else
+                Error(NoFileFoundMsg);
+        end;
 
+        ReadExcelSheet(Instream);
+    end;
+
+    internal procedure ReadExcelSheet(var Instream: InStream)
+    begin
         TempExcelBuffer.Reset();
         TempExcelBuffer.DeleteAll();
         TempExcelBuffer.OpenBookStream(Instream, SheetName);
         TempExcelBuffer.ReadSheet();
+        ImportExcelData();
     end;
 
 
@@ -59,7 +60,8 @@ codeunit 50100 "Investran - Dyanamic"
             //RecInvestranStaggingL."Cash Account" := GetValueAtCell(RowNo, 13);
             RecInvestranStaggingL.Insert(true);
         end;
-        Message(ExcelImportSucess);
+        if NOT HideMessage then
+            Message(ExcelImportSucess);
     end;
 
     local procedure GetValueAtCell(RowNo: Integer; ColNo: Integer): Text
@@ -81,11 +83,21 @@ codeunit 50100 "Investran - Dyanamic"
         Evaluate(Return, pValue);
     end;
 
+    internal procedure SetValue(CallingFromSFTp: Boolean; Instreamp: InStream; HideMessagep: Boolean)
+    begin
+        CallingFromSFT := CallingFromSFTp;
+        Instream := Instreamp;
+        HideMessage := HideMessagep;
+    end;
+
     var
         FileName: Text[100];
         SheetName: Text[100];
         TempExcelBuffer: Record "Excel Buffer" temporary;
         UploadExcelMsg: Label 'Please Choose the Excel file.';
         NoFileFoundMsg: Label 'No Excel file found!';
-        ExcelImportSucess: Label 'Excel is successfully imported.';
+        ExcelImportSucess: Label 'The Excel file has been successfully imported';
+        CallingFromSFT: Boolean;
+        Instream: InStream;
+        HideMessage: Boolean;
 }
