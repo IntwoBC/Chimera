@@ -11,9 +11,10 @@ codeunit 50001 InvestranUtility
         Instream: InStream;
         LogEntryNumber: Integer;
         ImportFileINBC: Codeunit "Import Investran File";
-        ResponseText: Text;
+        ResponseText, SheetName, filenam : Text;
+        TempExcelBuffer: Record "CSV Buffer" temporary;
     begin
-        if not Confirm('Do you want to import csv file from SFTP?', false) then exit;
+        if not Confirm('Do you want to import file from SFTP?', false) then exit;
 
         IntegrationSetup.GET;
         IntegrationSetup.TestField("Azure Function endpoint");
@@ -34,8 +35,8 @@ codeunit 50001 InvestranUtility
                 TempBlob.CreateOutStream(Outstream);
                 Base64Convert.FromBase64(ResponseText, Outstream);
                 TempBlob.CreateInStream(Instream);
-                ModifyLog(LogEntryNumber, false, CopyStr(ResponseText, 1, 500), true, true);
                 //-importing file in BC
+                ModifyLog(LogEntryNumber, false, CopyStr(ResponseText, 1, 500), true, true);
                 ClearLastError();
                 ImportFileINBC.SetValue(true, Instream, true);
                 if ImportFileINBC.Run() then begin
@@ -50,7 +51,6 @@ codeunit 50001 InvestranUtility
                 ModifyLog(LogEntryNumber, false, CopyStr(ResponseText, 1, 500), false, true);
                 Message('Status:Failed \Response:%1', CopyStr(ResponseText, 1, 500));
             end;
-
         end else begin
             ModifyLog(LogEntryNumber, false, CopyStr(StrSubstNo('Something went wront while connecting Azure FUnction. Response:%1', AzureFunction.GetResponse()), 1, 500), false, True);
             Message('Something went wront while connecting Azure FUnction. \Response:%1', AzureFunction.GetResponse());
@@ -103,4 +103,5 @@ codeunit 50001 InvestranUtility
         if SFTPLog.FindFirst() then
             Error('Import action has been already performed by UserId: %1, at: %2', SFTPLog."Action Performed By", SFTPLog."Action Performed At");
     end;
+
 }

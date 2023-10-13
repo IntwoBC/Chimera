@@ -62,11 +62,6 @@ table 50100 "Investran - Dyanamic Setup"
             DataClassification = ToBeClassified;
             ExtendedDatatype = Masked;
         }
-        field(13; "Import From SFT"; Boolean)
-        {
-            Caption = 'Import From SFT';
-            DataClassification = ToBeClassified;
-        }
     }
     keys
     {

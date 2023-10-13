@@ -4,6 +4,8 @@ page 50100 "Investran - Dyanamic Setup"
     Caption = 'Investran Dyanamic Setup';
     PageType = Card;
     SourceTable = "Investran - Dyanamic Setup";
+    InsertAllowed = false;
+    DeleteAllowed = false;
     UsageCategory = Administration;
 
     layout
@@ -33,12 +35,6 @@ page 50100 "Investran - Dyanamic Setup"
                     ToolTip = 'Specifies the value of the Investran Entity Active field.';
                     ApplicationArea = All;
                 }
-                field("Import From SFT"; Rec."Import From SFT")
-                {
-                    ToolTip = 'Specifies the value of the Import From SFT field.';
-                    ApplicationArea = All;
-                }
-
             }
             group("Azure Function Setup")
             {

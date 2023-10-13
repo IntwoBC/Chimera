@@ -6,25 +6,32 @@ codeunit 50100 "Import Investran File"
         FromFile: Text[200];
     begin
         if not CallingFromSFT then begin
-            UploadIntoStream(UploadExcelMsg, '', '', FromFile, Instream);
+            UploadIntoStream(UploadExcelMsg, '', '', FromFile, InstreamG);
             if FromFile <> '' then begin
                 FileName := FileMgmt.GetFileName(FromFile);
             end else
                 Error(NoFileFoundMsg);
         end;
-
-        ReadExcelSheet(Instream);
+        ReadExcelSheet();
     end;
 
-    internal procedure ReadExcelSheet(var Instream: InStream)
+    internal procedure ReadExcelSheet()
     var
         ProcessInvestranJournalL: Codeunit ProcessInvestranGeneral;
+        filenam: Text;
     begin
-        SheetName := TempExcelBuffer.SelectSheetsNameStream(Instream);
+        // filenam := 'Dynamics Daily Report_' + DelChr(Format(Today(), 0, '<Year4>/<Month,2>/<Day,2>'), '=', '/\-:') + '.xlsx';
+        // DownloadFromStream(Instream, '', '', '', filenam);
+        /* if not CallingFromSFT then begin
+             SheetName := TempExcelBuffer.SelectSheetsNameStream(Instream);
+             TempExcelBuffer.Reset();
+             TempExcelBuffer.DeleteAll();
+             TempExcelBuffer.OpenBookStream(Instream, SheetName);
+             TempExcelBuffer.ReadSheet();
+         end;*/
         TempExcelBuffer.Reset();
         TempExcelBuffer.DeleteAll();
-        TempExcelBuffer.OpenBookStream(Instream, SheetName);
-        TempExcelBuffer.ReadSheet();
+        TempExcelBuffer.LoadDataFromStream(InstreamG, ',');
         ImportExcelData();
         ClearLastError();
         Commit();
@@ -42,11 +49,11 @@ codeunit 50100 "Import Investran File"
         RowNo := 0;
         MaxRowNo := 0;
 
-        TempExcelBuffer.Reset();
-        if TempExcelBuffer.FindLast() then begin
-            MaxRowNo := TempExcelBuffer."Row No.";
-        end;
-
+        // TempExcelBuffer.Reset();
+        // if TempExcelBuffer.FindLast() then begin
+        //     MaxRowNo := TempExcelBuffer."Row No.";
+        // end;
+        MaxRowNo := TempExcelBuffer.GetNumberOfLines();
         for RowNo := 2 to MaxRowNo do begin
             RecInvestranStaggingL.Init();
             RecInvestranStaggingL."Row No" := RowNo;
@@ -70,11 +77,20 @@ codeunit 50100 "Import Investran File"
             Message(ExcelImportSucess);
     end;
 
+    // local procedure GetValueAtCell(RowNo: Integer; ColNo: Integer): Text
+    // begin
+    //     TempExcelBuffer.Reset();
+    //     If TempExcelBuffer.Get(RowNo, ColNo) then
+    //         exit(TempExcelBuffer."Cell Value as Text")
+    //     else
+    //         exit('');
+    // end;
+
     local procedure GetValueAtCell(RowNo: Integer; ColNo: Integer): Text
     begin
         TempExcelBuffer.Reset();
         If TempExcelBuffer.Get(RowNo, ColNo) then
-            exit(TempExcelBuffer."Cell Value as Text")
+            exit(TempExcelBuffer.Value.TrimEnd('"').TrimStart('"'))
         else
             exit('');
     end;
@@ -89,21 +105,22 @@ codeunit 50100 "Import Investran File"
         Evaluate(Return, pValue);
     end;
 
-    internal procedure SetValue(CallingFromSFTp: Boolean; Instreamp: InStream; HideMessagep: Boolean)
+    internal procedure SetValue(CallingFromSFTp: Boolean; var Ins: InStream; HideMessagep: Boolean)
     begin
         CallingFromSFT := CallingFromSFTp;
-        Instream := Instreamp;
+        InstreamG := Ins;
         HideMessage := HideMessagep;
     end;
 
     var
         FileName: Text[100];
         SheetName: Text[100];
-        TempExcelBuffer: Record "Excel Buffer" temporary;
+        // TempExcelBuffer: Record "Excel Buffer" temporary;
+        TempExcelBuffer: Record "CSV Buffer" temporary;
         UploadExcelMsg: Label 'Please Choose the Excel file.';
         NoFileFoundMsg: Label 'No Excel file found!';
         ExcelImportSucess: Label 'The Excel file has been successfully imported';
         CallingFromSFT: Boolean;
-        Instream: InStream;
+        InstreamG: InStream;
         HideMessage: Boolean;
 }

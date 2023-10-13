@@ -8,9 +8,8 @@ codeunit 50101 CreateGeneralJournal
     begin
         Clear(RecInvestranDynamicSetupL);
         RecInvestranDynamicSetupL.Get();
-        RecInvestranDynamicSetupL.TestField("Investran Entity Active");
-        RecInvestranDynamicSetupL.TestField("Journal Template Name");
-        RecInvestranDynamicSetupL.TestField("Journal Batch Name");
+        if (RecInvestranDynamicSetupL."Investran Entity Active" = false) OR (RecInvestranDynamicSetupL."Journal Template Name" = '') OR (RecInvestranDynamicSetupL."Journal Batch Name" = '') then
+            exit;
 
         Clear(RecInvestranDynamicStaggingL);
         RecInvestranDynamicStaggingL.SetCurrentKey("Row No");

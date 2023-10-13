@@ -5,7 +5,7 @@ page 50101 "Investran Dynamic Stagging"
     PageType = List;
     SourceTable = "Investran Dynamic Stagging";
     UsageCategory = Lists;
-
+    SourceTableView = sorting("Row No") order(descending);
     layout
     {
         area(content)
@@ -91,11 +91,13 @@ page 50101 "Investran Dynamic Stagging"
                 {
                     ToolTip = 'Specifies the value of the Status field.';
                     ApplicationArea = All;
+                    Editable = false;
                 }
                 field("Error Remarks"; Rec."Error Remarks")
                 {
                     ToolTip = 'Specifies the value of the Error Remarks field.';
                     ApplicationArea = All;
+                    Editable = false;
                 }
             }
         }
@@ -109,9 +111,10 @@ page 50101 "Investran Dynamic Stagging"
                 Caption = 'Import File Manually';
                 ApplicationArea = All;
                 Image = Import;
-                Promoted = true;
-                PromotedCategory = Process;
-                PromotedOnly = true;
+                Visible = false;
+                // Promoted = true;
+                // PromotedCategory = Process;
+                // PromotedOnly = true;
                 trigger OnAction()
                 var
                     Import: Codeunit "Import Investran File";
@@ -121,17 +124,18 @@ page 50101 "Investran Dynamic Stagging"
             }
             action(ProcessGeneralJournal)
             {
-                Caption = 'Process General Journal';
+                Caption = 'Run Job To Transfer Data';
                 ApplicationArea = All;
                 Image = Journal;
-                Promoted = true;
-                PromotedCategory = Process;
-                PromotedOnly = true;
+                // Promoted = true;
+                // PromotedCategory = Process;
+                // PromotedOnly = true;
                 trigger OnAction()
                 var
                     CreateGeneralJournal: Codeunit CreateGeneralJournal;
                 begin
-                    CreateGeneralJournal.Run();
+                    //CreateGeneralJournal.Run();
+                    Codeunit.Run(Codeunit::ProcessInvestranGeneral);
                 end;
             }
             action("Import File From SFTP")
@@ -147,6 +151,36 @@ page 50101 "Investran Dynamic Stagging"
                     Utility: Codeunit InvestranUtility;
                 begin
                     Utility.ImportFileFromSFTPLocation(Rec);
+                end;
+            }
+
+            action("Reset Status")
+            {
+                Caption = 'Reset Status';
+                ApplicationArea = All;
+                Image = Journal;
+                Promoted = true;
+                PromotedCategory = Process;
+                PromotedOnly = true;
+                trigger OnAction()
+                var
+                    Utility: Codeunit InvestranUtility;
+                    Recstaging: Record "Investran Dynamic Stagging";
+                begin
+                    Clear(Recstaging);
+                    CurrPage.SetSelectionFilter(Recstaging);
+                    if Recstaging.FindSet() then begin
+                        if not Confirm('Do you want to reset status?', false) then
+                            exit;
+                        repeat
+                            if not (Recstaging.Status in [Recstaging.Status::Error, Recstaging.Status::" "]) then
+                                Recstaging.TestField(Status, Recstaging.Status::Error);
+
+                            Recstaging.Status := Recstaging.Status::"Ready To Sync";
+                            Recstaging."Error Remarks" := '';
+                            Recstaging.Modify();
+                        until Recstaging.Next() = 0;
+                    end;
                 end;
             }
         }

@@ -2,7 +2,7 @@ table 50001 "SFTP Integration Log"
 {
     Caption = 'SFTP Integration Log';
     DataClassification = ToBeClassified;
-
+    DataPerCompany = false;
     fields
     {
         field(1; "Entry No."; Integer)

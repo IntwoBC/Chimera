@@ -7,16 +7,19 @@ codeunit 50002 ProcessInvestranGeneral
         CompanyL: Record Company;
         InvsetranSetupL: Record "Investran - Dyanamic Setup";
     begin
-        if CompanyL.FindSet() then
+        if CompanyL.FindSet() then begin
             repeat
                 Clear(InvsetranSetupL);
-                InvsetranSetupL.ChangeCompany(CompanyL.Name);
-                InvsetranSetupL.Get();
-                if InvsetranSetupL."Import From SFT" then begin
-                    if TaskScheduler.CanCreateTask() then begin
-                        TaskScheduler.CreateTask(Codeunit::CreateGeneralJournal, 0, true, CompanyL.Name);
+                if InvsetranSetupL.ChangeCompany(CompanyL.Name) then begin
+                    if InvsetranSetupL.Get() then begin
+                        if InvsetranSetupL."Investran Entity Active" then begin
+                            if TaskScheduler.CanCreateTask() then begin
+                                TaskScheduler.CreateTask(Codeunit::CreateGeneralJournal, 0, true, CompanyL.Name);
+                            end;
+                        end;
                     end;
                 end;
             until CompanyL.Next() = 0;
+        end;
     end;
 }

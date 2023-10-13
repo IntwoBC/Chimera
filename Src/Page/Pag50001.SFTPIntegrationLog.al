@@ -6,7 +6,7 @@ page 50001 "SFTP Integration Log"
     SourceTable = "SFTP Integration Log";
     UsageCategory = Lists;
     Editable = false;
-
+    SourceTableView = sorting("Entry No.") order(descending);
     layout
     {
         area(content)
