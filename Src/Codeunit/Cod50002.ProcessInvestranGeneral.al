@@ -15,7 +15,6 @@ codeunit 50002 ProcessInvestranGeneral
                 if InvsetranSetupL."Import From SFT" then begin
                     if TaskScheduler.CanCreateTask() then begin
                         TaskScheduler.CreateTask(Codeunit::CreateGeneralJournal, 0, true, CompanyL.Name);
-                        CreateGeneralJournal.ProcessJournal(CompanyL.Name);
                     end;
                 end;
             until CompanyL.Next() = 0;
