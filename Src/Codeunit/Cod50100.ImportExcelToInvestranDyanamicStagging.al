@@ -17,6 +17,8 @@ codeunit 50100 "Import Investran File"
     end;
 
     internal procedure ReadExcelSheet(var Instream: InStream)
+    var
+        ProcessInvestranJournalL: Codeunit ProcessInvestranGeneral;
     begin
         SheetName := TempExcelBuffer.SelectSheetsNameStream(Instream);
         TempExcelBuffer.Reset();
@@ -24,6 +26,9 @@ codeunit 50100 "Import Investran File"
         TempExcelBuffer.OpenBookStream(Instream, SheetName);
         TempExcelBuffer.ReadSheet();
         ImportExcelData();
+        ClearLastError();
+        Commit();
+        ProcessInvestranJournalL.Run();
     end;
 
 
@@ -58,6 +63,7 @@ codeunit 50100 "Import Investran File"
             RecInvestranStaggingL.Credits := GetValueAsDecimal(GetValueAtCell(RowNo, 11));
             RecInvestranStaggingL."Comments Batch" := GetValueAtCell(RowNo, 12);
             //RecInvestranStaggingL."Cash Account" := GetValueAtCell(RowNo, 13);
+            RecInvestranStaggingL.Status := RecInvestranStaggingL.Status::"Ready To Sync";
             RecInvestranStaggingL.Insert(true);
         end;
         if NOT HideMessage then

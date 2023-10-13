@@ -66,6 +66,16 @@ table 50101 "Investran Dynamic Stagging"
         {
             Caption = 'Cash Account';
         }
+        field(16; Status; Option)
+        {
+            Caption = 'Status';
+            DataClassification = ToBeClassified;
+            OptionMembers = " ","Ready To Sync",Synced,Error;
+        }
+        field(17; "Error Remarks"; Code[500])
+        {
+            DataClassification = ToBeClassified;
+        }
     }
     keys
     {
