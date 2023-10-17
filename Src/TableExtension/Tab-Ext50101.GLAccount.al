@@ -2,7 +2,7 @@ tableextension 50101 "GL Account" extends "G/L Account"
 {
     fields
     {
-        field(50100; "Investran Code Mapping"; Text[100])
+        field(50100; "Investran Code Mapping"; code[50])
         {
             Caption = 'Investran Code Mapping';
             DataClassification = ToBeClassified;
@@ -16,7 +16,7 @@ tableextension 50101 "GL Account" extends "G/L Account"
                     RecGLAccount.SetFilter("No.", '<>%1', Rec."No.");
                     if RecGLAccount.FindFirst() then
                         Error('Same mapping has been already used for G/L Account No.: %1', RecGLAccount."No.");
-                end
+                end;
 
             end;
         }

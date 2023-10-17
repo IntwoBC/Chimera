@@ -10,23 +10,23 @@ table 50101 "Investran Dynamic Stagging"
         {
             Caption = 'Row No';
         }
-        field(2; "Legal Entity"; Text[50])
+        field(2; "Legal Entity"; code[100])
         {
             Caption = 'Legal Entity';
         }
-        field(3; "Product Name"; Text[50])
+        field(3; "Product Name"; code[50])
         {
             Caption = 'Product Name';
         }
-        field(4; "Investment Code"; Text[50])
+        field(4; "Investment Code"; code[50])
         {
             Caption = 'Investment Code';
         }
-        field(5; "Deal Domain"; Text[50])
+        field(5; "Deal Domain"; code[50])
         {
             Caption = 'Deal Domain';
         }
-        field(6; "Security Type"; Text[50])
+        field(6; "Security Type"; code[50])
         {
             Caption = 'Security Type';
         }
