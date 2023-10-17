@@ -6,6 +6,9 @@ page 50101 "Investran Dynamic Stagging"
     SourceTable = "Investran Dynamic Stagging";
     UsageCategory = Lists;
     SourceTableView = sorting("Row No") order(descending);
+    InsertAllowed = false;
+    ModifyAllowed = true;
+    DeleteAllowed = true;
     layout
     {
         area(content)
