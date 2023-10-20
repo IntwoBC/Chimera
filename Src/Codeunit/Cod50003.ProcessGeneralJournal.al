@@ -63,10 +63,17 @@ codeunit 50003 "Process General Journal"
     begin
         Clear(AccountNoL);
         Clear(GLAccountL);
-        GLAccountL.SetRange("Investran Code Mapping", CopyStr(RecInvestranDynamicStaggingP."GL Account", 1, 5));
-        GLAccountL.FindFirst();
-        AccountNoL := GLAccountL."No.";
-        exit(AccountNoL);
+        if '10010' = CopyStr(RecInvestranDynamicStaggingP."GL Account", 1, 5) then begin
+            GLAccountL.SetRange("Investran Bank Mapping", RecInvestranDynamicStaggingP."Cash Account");
+            GLAccountL.FindFirst();
+            AccountNoL := GLAccountL."No.";
+            exit(AccountNoL);
+        end else begin
+            GLAccountL.SetRange("Investran Code Mapping", CopyStr(RecInvestranDynamicStaggingP."GL Account", 1, 5));
+            GLAccountL.FindFirst();
+            AccountNoL := GLAccountL."No.";
+            exit(AccountNoL);
+        end;
     end;
 
     local procedure SetShortDim1(RecInvestranDynamicStaggingP: Record "Investran Dynamic Stagging")
