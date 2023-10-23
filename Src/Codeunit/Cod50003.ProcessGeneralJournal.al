@@ -18,14 +18,17 @@ codeunit 50003 "Process General Journal"
         RecGeneralJournalLine.Init();
         RecGeneralJournalLine."Journal Template Name" := RecInvestranDynamicSetupL."Journal Template Name";
         RecGeneralJournalLine."Journal Batch Name" := RecInvestranDynamicSetupL."Journal Batch Name";
-        RecGeneralJournalLine."Line No." := LineNoL;
-        RecGeneralJournalLine."Currency Code" := Rec."Deal Currency";
-        RecGeneralJournalLine."Posting Date" := Rec."GL Date";
-        RecGeneralJournalLine."Account Type" := RecGeneralJournalLine."Account Type"::"G/L Account";
+        RecGeneralJournalLine.Validate("Document No.", Rec."Batch ID");
+        RecGeneralJournalLine.Validate("Line No.", LineNoL);
+        RecGeneralJournalLine.Validate("Posting Date", Rec."GL Date");
+        if '10010' = CopyStr(Rec."GL Account", 1, 5) then
+            RecGeneralJournalLine.Validate("Account Type", RecGeneralJournalLine."Account Type"::"Bank Account")
+        else
+            RecGeneralJournalLine.Validate("Account Type", RecGeneralJournalLine."Account Type"::"G/L Account");
         RecGeneralJournalLine.Validate("Account No.", GetGLAccount(Rec));
-        RecGeneralJournalLine."Document No." := Rec."Batch ID";
-        RecGeneralJournalLine."Debit Amount" := Rec.Debits;
-        RecGeneralJournalLine."Credit Amount" := Rec.Credits;
+        RecGeneralJournalLine.Validate("Currency Code", Rec."Deal Currency");
+        RecGeneralJournalLine.Validate("Debit Amount", Rec.Debits);
+        RecGeneralJournalLine.Validate("Credit Amount", Rec.Credits);
         SetShortDim1(Rec);
         SetShortDim2(Rec);
         SetShortDim5(Rec);
@@ -33,7 +36,7 @@ codeunit 50003 "Process General Journal"
         SetShortDim8(Rec);
         RecGeneralJournalLine.Validate("Dimension Set ID", GetDimensionSetID());
         DimMgt.UpdateGlobalDimFromDimSetID(RecGeneralJournalLine."Dimension Set ID", RecGeneralJournalLine."Shortcut Dimension 1 Code", RecGeneralJournalLine."Shortcut Dimension 2 Code");
-        RecGeneralJournalLine.Description := Rec."Comments Batch";
+        RecGeneralJournalLine.Validate(Description, Rec."Comments Batch");
         RecGeneralJournalLine.Insert(true);
     end;
 
@@ -60,13 +63,14 @@ codeunit 50003 "Process General Journal"
     var
         AccountNoL: Code[20];
         GLAccountL: Record "G/L Account";
+        BankAccountL: Record "Bank Account";
     begin
         Clear(AccountNoL);
         Clear(GLAccountL);
         if '10010' = CopyStr(RecInvestranDynamicStaggingP."GL Account", 1, 5) then begin
-            GLAccountL.SetRange("Investran Bank Mapping", RecInvestranDynamicStaggingP."Cash Account");
-            GLAccountL.FindFirst();
-            AccountNoL := GLAccountL."No.";
+            BankAccountL.SetRange("Investran Bank Mapping", RecInvestranDynamicStaggingP."Cash Account");
+            BankAccountL.FindFirst();
+            AccountNoL := BankAccountL."No.";
             exit(AccountNoL);
         end else begin
             GLAccountL.SetRange("Investran Code Mapping", CopyStr(RecInvestranDynamicStaggingP."GL Account", 1, 5));
