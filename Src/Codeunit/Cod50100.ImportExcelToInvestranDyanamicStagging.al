@@ -69,7 +69,7 @@ codeunit 50100 "Import Investran File"
             RecInvestranStaggingL.Debits := GetValueAsDecimal(GetValueAtCell(RowNo, 10));
             RecInvestranStaggingL.Credits := GetValueAsDecimal(GetValueAtCell(RowNo, 11));
             RecInvestranStaggingL."Comments Batch" := GetValueAtCell(RowNo, 12);
-            //RecInvestranStaggingL."Cash Account" := GetValueAtCell(RowNo, 13);
+            RecInvestranStaggingL."Cash Account" := GetValueAtCell(RowNo, 13);
             RecInvestranStaggingL.Status := RecInvestranStaggingL.Status::"Ready To Sync";
             RecInvestranStaggingL.Insert(true);
         end;
