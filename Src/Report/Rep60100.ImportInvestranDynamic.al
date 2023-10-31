@@ -1,4 +1,4 @@
-report 50000 "Import Investran Dynamic"
+report 60100 "Import Investran Dynamic"
 {
     ApplicationArea = All;
     Caption = 'Import Investran Dynamic';

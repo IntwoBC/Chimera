@@ -1,4 +1,4 @@
-codeunit 50002 ProcessInvestranGeneral
+codeunit 60002 ProcessInvestranGeneral
 {
     Permissions = tabledata "Scheduled Task" = RIMD;
     trigger OnRun()

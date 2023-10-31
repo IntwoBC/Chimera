@@ -1,4 +1,4 @@
-permissionset 50000 """Chimera Development"
+permissionset 60000 """Chimera Development"
 {
     Assignable = true;
     Caption = '"Chimera Development', MaxLength = 30;

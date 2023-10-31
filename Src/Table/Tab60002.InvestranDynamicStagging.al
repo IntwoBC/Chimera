@@ -1,4 +1,4 @@
-table 50101 "Investran Dynamic Stagging"
+table 60002 "Investran Dynamic Stagging"
 {
     Caption = 'Investran Dynamic Stagging';
     DataClassification = ToBeClassified;

@@ -1,4 +1,4 @@
-codeunit 50001 InvestranUtility
+codeunit 60001 InvestranUtility
 {
 
     procedure ImportFileFromSFTPLocation(var RecStaging: Record "Investran Dynamic Stagging")
