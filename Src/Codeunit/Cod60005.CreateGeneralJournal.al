@@ -1,4 +1,4 @@
-codeunit 50101 CreateGeneralJournal
+codeunit 60005 CreateGeneralJournal
 {
     trigger OnRun()
     var

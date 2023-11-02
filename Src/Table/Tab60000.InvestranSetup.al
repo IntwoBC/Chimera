@@ -1,4 +1,4 @@
-table 50100 "Investran - Dyanamic Setup"
+table 60000 "Investran - Dyanamic Setup"
 {
     Caption = 'Investran Dyanamic Setup';
     DataClassification = ToBeClassified;

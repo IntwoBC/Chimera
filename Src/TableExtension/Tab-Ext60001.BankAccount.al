@@ -1,4 +1,4 @@
-tableextension 50001 BankAccount extends "Bank Account"
+tableextension 60001 BankAccount extends "Bank Account"
 {
     fields
     {

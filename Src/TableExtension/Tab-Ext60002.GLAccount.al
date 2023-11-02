@@ -1,4 +1,4 @@
-tableextension 50101 "GL Account" extends "G/L Account"
+tableextension 60002 "GL Account" extends "G/L Account"
 {
     fields
     {

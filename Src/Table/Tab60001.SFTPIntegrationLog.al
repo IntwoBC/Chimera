@@ -1,4 +1,4 @@
-table 50001 "SFTP Integration Log"
+table 60001 "SFTP Integration Log"
 {
     Caption = 'SFTP Integration Log';
     DataClassification = ToBeClassified;

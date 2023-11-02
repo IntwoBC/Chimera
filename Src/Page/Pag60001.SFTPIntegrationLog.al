@@ -1,4 +1,4 @@
-page 50001 "SFTP Integration Log"
+page 60001 "SFTP Integration Log"
 {
     ApplicationArea = All;
     Caption = 'SFTP Integration Log';

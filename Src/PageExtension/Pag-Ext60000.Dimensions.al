@@ -1,4 +1,4 @@
-pageextension 50101 DimensionsValues extends "Dimension Values"
+pageextension 60000 DimensionsValues extends "Dimension Values"
 {
     layout
     {

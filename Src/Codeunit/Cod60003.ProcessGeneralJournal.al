@@ -1,4 +1,4 @@
-codeunit 50003 "Process General Journal"
+codeunit 60003 "Process General Journal"
 {
     TableNo = "Investran Dynamic Stagging";
 

@@ -1,4 +1,4 @@
-codeunit 50102 AzureFunctionIntegration
+codeunit 60006 AzureFunctionIntegration
 {
     trigger OnRun()
     begin

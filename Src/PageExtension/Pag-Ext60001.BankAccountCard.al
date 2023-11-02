@@ -1,4 +1,4 @@
-pageextension 50001 BankAccountCard extends "Bank Account Card"
+pageextension 60001 BankAccountCard extends "Bank Account Card"
 {
     layout
     {

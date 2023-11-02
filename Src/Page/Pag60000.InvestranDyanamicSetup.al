@@ -1,4 +1,4 @@
-page 50100 "Investran - Dyanamic Setup"
+page 60000 "Investran - Dyanamic Setup"
 {
     ApplicationArea = All;
     Caption = 'Investran Dyanamic Setup';

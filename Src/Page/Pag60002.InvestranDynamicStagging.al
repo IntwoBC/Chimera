@@ -1,4 +1,4 @@
-page 50101 "Investran Dynamic Stagging"
+page 60002 "Investran Dynamic Stagging"
 {
     ApplicationArea = All;
     Caption = 'Investran Dynamic Stagging';

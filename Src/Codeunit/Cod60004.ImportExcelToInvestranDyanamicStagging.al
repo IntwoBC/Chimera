@@ -1,4 +1,4 @@
-codeunit 50100 "Import Investran File"
+codeunit 60004 "Import Investran File"
 {
     trigger OnRun()
     var
