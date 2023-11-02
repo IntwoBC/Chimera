@@ -11,12 +11,6 @@
   "url": "",
   "logo": "",
   "dependencies": [
-    {
-      "id": "893dde6f-a690-4518-b524-fcd1e56f2f3f",
-      "name": "Chimera",
-      "publisher": "CETAS Information Technology",
-      "version": "1.0.0.0"
-    }
   ],
   "screenshots": [],
   "platform": "1.0.0.0",

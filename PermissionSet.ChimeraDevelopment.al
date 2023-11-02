@@ -1,7 +1,7 @@
-permissionset 60000 """Chimera Development"
+permissionset 60000 "Chimera Development"
 {
     Assignable = true;
-    Caption = '"Chimera Development', MaxLength = 30;
+    Caption = 'Chimera Development By InTWO', MaxLength = 30;
     Permissions =
         table "Investran - Dyanamic Setup" = X,
         tabledata "Investran - Dyanamic Setup" = RMID,
