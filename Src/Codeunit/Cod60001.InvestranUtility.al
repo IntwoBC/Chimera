@@ -23,7 +23,7 @@ codeunit 60001 InvestranUtility
         IntegrationSetup.TestField(Username);
         IntegrationSetup.TestField(Password);
         CheckDuplicacy();
-        LogEntryNumber := InsertLog(IntegrationSetup.Filename + Format(Today(), 0, '<Year4>/<Month,2>/<Day,2>') + '.csv',
+        LogEntryNumber := InsertLog(IntegrationSetup.Filename + DelChr(Format(Today(), 0, '<Year4>/<Month,2>/<Day,2>'), '=', '/\-:') + '.csv',
          IntegrationSetup."Remote Folder", IntegrationSetup."Azure Function endpoint" + IntegrationSetup."Authentication Code");
 
         ClearLastError();
@@ -36,7 +36,12 @@ codeunit 60001 InvestranUtility
                 Base64Convert.FromBase64(ResponseText, Outstream);
                 TempBlob.CreateInStream(Instream);
                 //-importing file in BC
-                ModifyLog(LogEntryNumber, false, CopyStr(ResponseText, 1, 500), true, true);
+                if ResponseText = '' then begin
+                    ModifyLog(LogEntryNumber, false, 'Looks like SFTP File is not uploaded/accessible/Blank', true, true);
+                    Error('Looks like SFTP File is not uploaded/accessible/Blank');
+                end else
+                    ModifyLog(LogEntryNumber, false, CopyStr(ResponseText, 1, 500), true, true);
+
                 ClearLastError();
                 ImportFileINBC.SetValue(true, Instream, true);
                 if ImportFileINBC.Run() then begin
