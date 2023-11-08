@@ -1,1 +1,1 @@
-﻿{"Added":[],"Modified":[],"Removed":[]}
+﻿{"Added":[],"Modified":[{"Id":60001,"Kind":11,"Name":"InvestranUtility","Namespace":""},{"Id":60004,"Kind":11,"Name":"Import Investran File","Namespace":""},{"Id":60005,"Kind":11,"Name":"CreateGeneralJournal","Namespace":""},{"Id":60006,"Kind":11,"Name":"AzureFunctionIntegration","Namespace":""}],"Removed":[]}

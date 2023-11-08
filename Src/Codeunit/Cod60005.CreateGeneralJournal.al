@@ -29,6 +29,7 @@ codeunit 60005 CreateGeneralJournal
                     RecInvestranDynamicStaggingL.Modify();
                 end;
             until RecInvestranDynamicStaggingL.Next() = 0;
-        Message('Total %1, lines processed sucessfully', CountL);
+        if GuiAllowed then
+            Message('Total %1, lines processed sucessfully', CountL);
     end;
 }

@@ -20,7 +20,7 @@ codeunit 60004 "Import Investran File"
         ProcessInvestranJournalL: Codeunit ProcessInvestranGeneral;
         filenam: Text;
     begin
-        // filenam := 'Dynamics Daily Report_' + DelChr(Format(Today(), 0, '<Year4>/<Month,2>/<Day,2>'), '=', '/\-:') + '.xlsx';
+        // filenam := 'Dynamics Daily Report_' + DelChr(Format(WorkDate(), 0, '<Year4>/<Month,2>/<Day,2>'), '=', '/\-:') + '.xlsx';
         // DownloadFromStream(Instream, '', '', '', filenam);
         /* if not CallingFromSFT then begin
              SheetName := TempExcelBuffer.SelectSheetsNameStream(Instream);
@@ -35,7 +35,7 @@ codeunit 60004 "Import Investran File"
         ImportExcelData();
         ClearLastError();
         Commit();
-        ProcessInvestranJournalL.Run();
+        // ProcessInvestranJournalL.Run();//commented as client want to process data manually.s
     end;
 
 
@@ -73,8 +73,10 @@ codeunit 60004 "Import Investran File"
             RecInvestranStaggingL.Status := RecInvestranStaggingL.Status::"Ready To Sync";
             RecInvestranStaggingL.Insert(true);
         end;
-        if NOT HideMessage then
-            Message(ExcelImportSucess);
+        if GuiAllowed then begin
+            if NOT HideMessage then
+                Message(ExcelImportSucess);
+        end;
     end;
 
     // local procedure GetValueAtCell(RowNo: Integer; ColNo: Integer): Text

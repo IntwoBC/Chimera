@@ -48,13 +48,12 @@ codeunit 60006 AzureFunctionIntegration
         IntegrationSetup: Record "Investran - Dyanamic Setup";
     begin
         IntegrationSetup.GET;
-
         Auth := AzureAuth.CreateCodeAuth(IntegrationSetup."Azure Function endpoint", IntegrationSetup."Authentication Code");
         DQuery.Add('Host', IntegrationSetup.Host);//'SFTP-Investran-uk.fisglobal.com');
         DQuery.Add('UserName', IntegrationSetup.Username);//'FTP_Chimera_PBI_PROD');
         DQuery.Add('Password', IntegrationSetup.Password);//'r#f4y4*dt#tzyzD$');
         DQuery.Add('RemoteFolder', IntegrationSetup."Remote Folder");//'/');
-        DQuery.Add('FileName', IntegrationSetup.Filename + DelChr(Format(Today(), 0, '<Year4>/<Month,2>/<Day,2>'), '=', '/\-:'));// 'Dynamics Daily Report_20230922170158.csv');
+        DQuery.Add('FileName', IntegrationSetup.Filename + DelChr(Format(WorkDate(), 0, '<Year4>/<Month,2>/<Day,2>'), '=', '/\-:'));// 'Dynamics Daily Report_20230922170158.csv');
         CodResponse := AzureFn.SendGetRequest(Auth, DQuery);
         if CodResponse.IsSuccessful() then begin
             IsSuccess := TRUE;

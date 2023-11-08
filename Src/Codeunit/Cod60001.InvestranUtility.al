@@ -1,6 +1,13 @@
 codeunit 60001 InvestranUtility
 {
 
+    trigger OnRun()
+    var
+        RecStagingL: Record "Investran Dynamic Stagging";
+    begin
+        ImportFileFromSFTPLocation(RecStagingL);
+    end;
+
     procedure ImportFileFromSFTPLocation(var RecStaging: Record "Investran Dynamic Stagging")
     var
         IntegrationSetup: Record "Investran - Dyanamic Setup";
@@ -14,7 +21,8 @@ codeunit 60001 InvestranUtility
         ResponseText, SheetName, filenam : Text;
         TempExcelBuffer: Record "CSV Buffer" temporary;
     begin
-        if not Confirm('Do you want to import file from SFTP?', false) then exit;
+        if GuiAllowed then
+            if not Confirm('Do you want to import file from SFTP?', false) then exit;
 
         IntegrationSetup.GET;
         IntegrationSetup.TestField("Azure Function endpoint");
@@ -23,7 +31,7 @@ codeunit 60001 InvestranUtility
         IntegrationSetup.TestField(Username);
         IntegrationSetup.TestField(Password);
         CheckDuplicacy();
-        LogEntryNumber := InsertLog(IntegrationSetup.Filename + DelChr(Format(Today(), 0, '<Year4>/<Month,2>/<Day,2>'), '=', '/\-:') + '.csv',
+        LogEntryNumber := InsertLog(IntegrationSetup.Filename + DelChr(Format(Workdate(), 0, '<Year4>/<Month,2>/<Day,2>'), '=', '/\-:') + '.csv',
          IntegrationSetup."Remote Folder", IntegrationSetup."Azure Function endpoint" + IntegrationSetup."Authentication Code");
 
         ClearLastError();
@@ -46,7 +54,8 @@ codeunit 60001 InvestranUtility
                 ImportFileINBC.SetValue(true, Instream, true);
                 if ImportFileINBC.Run() then begin
                     ModifyLog(LogEntryNumber, true, CopyStr(ResponseText, 1, 500), true, true);
-                    Message('File has been successfully fetched from SFTP & imported in Business Central');
+                    if GuiAllowed then
+                        Message('File has been successfully fetched from SFTP & imported in Business Central');
                 end else begin
                     ModifyLog(LogEntryNumber, false, CopyStr(GetLastErrorText(), 1, 500), true, true);
                 end;
@@ -54,11 +63,13 @@ codeunit 60001 InvestranUtility
                 // DownloadFromStream(Instream, '', '', '', IntegrationSetup.Filename);
             end else begin
                 ModifyLog(LogEntryNumber, false, CopyStr(ResponseText, 1, 500), false, true);
-                Message('Status:Failed \Response:%1', CopyStr(ResponseText, 1, 500));
+                if GuiAllowed then
+                    Message('Status:Failed \Response:%1', CopyStr(ResponseText, 1, 500));
             end;
         end else begin
             ModifyLog(LogEntryNumber, false, CopyStr(StrSubstNo('Something went wront while connecting Azure FUnction. Response:%1', AzureFunction.GetResponse()), 1, 500), false, True);
-            Message('Something went wront while connecting Azure FUnction. \Response:%1', AzureFunction.GetResponse());
+            if GuiAllowed then
+                Message('Something went wront while connecting Azure FUnction. \Response:%1', AzureFunction.GetResponse());
         end;
 
     end;
@@ -77,7 +88,7 @@ codeunit 60001 InvestranUtility
         SFTPLog."SFTP URL" := URL;
         SFTPLog."Successfully Imported" := false;
         SFTPLog."Error Remarks" := '';
-        SFTPLog."Action Performed ON" := Today();
+        SFTPLog."Action Performed ON" := WorkDate();
         SFTPLog.Modify(true);
         Commit();
         exit(SFTPLog."Entry No.");
@@ -101,7 +112,7 @@ codeunit 60001 InvestranUtility
         SFTPLog: Record "SFTP Integration Log";
     begin
         Clear(SFTPLog);
-        SFTPLog.SetRange("Action Performed ON", Today());
+        SFTPLog.SetRange("Action Performed ON", WorkDate());
         SFTPLog.SetRange("Successfully Imported", true);
         SFTPLog.SetRange("File Received From SFTP", true);
         //SFTPLog.SetFilter("Error Remarks", '=%1', '');
