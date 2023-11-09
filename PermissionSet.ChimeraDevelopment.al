@@ -13,6 +13,7 @@ permissionset 60000 "Chimera Development"
         codeunit InvestranUtility = X,
         codeunit ProcessInvestranGeneral = X,
         codeunit CreateGeneralJournal = X,
+        codeunit "SFTP Automation" = X,
         codeunit "Import Investran File" = X,
         page "SFTP Integration Log" = X,
         page "Investran - Dyanamic Setup" = X,

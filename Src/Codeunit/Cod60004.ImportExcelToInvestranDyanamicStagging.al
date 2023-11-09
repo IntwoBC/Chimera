@@ -56,7 +56,8 @@ codeunit 60004 "Import Investran File"
         MaxRowNo := TempExcelBuffer.GetNumberOfLines();
         for RowNo := 2 to MaxRowNo do begin
             RecInvestranStaggingL.Init();
-            RecInvestranStaggingL."Row No" := RowNo;
+            RecInvestranStaggingL."Row No" := 0;// RowNo;
+            RecInvestranStaggingL.Insert(true);
             RecInvestranStaggingL."Legal Entity" := GetValueAtCell(RowNo, 1);
             RecInvestranStaggingL."Product Name" := GetValueAtCell(RowNo, 2);
             RecInvestranStaggingL."Investment Code" := GetValueAtCell(RowNo, 3);
@@ -71,7 +72,7 @@ codeunit 60004 "Import Investran File"
             RecInvestranStaggingL."Comments Batch" := GetValueAtCell(RowNo, 12);
             RecInvestranStaggingL."Cash Account" := GetValueAtCell(RowNo, 13);
             RecInvestranStaggingL.Status := RecInvestranStaggingL.Status::"Ready To Sync";
-            RecInvestranStaggingL.Insert(true);
+            RecInvestranStaggingL.Modify(true);
         end;
         if GuiAllowed then begin
             if NOT HideMessage then

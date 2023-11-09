@@ -9,6 +9,7 @@ table 60002 "Investran Dynamic Stagging"
         field(1; "Row No"; Integer)
         {
             Caption = 'Row No';
+            AutoIncrement = true;
         }
         field(2; "Legal Entity"; code[100])
         {
