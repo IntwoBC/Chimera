@@ -39,6 +39,7 @@ page 60001 "SFTP Integration Log"
                 {
                     ToolTip = 'Specifies the value of the Folder Pah field.';
                     ApplicationArea = All;
+                    Caption = 'Folder Path';
                 }
                 field(Filename; Rec.Filename)
                 {

@@ -26,7 +26,7 @@ table 60001 "SFTP Integration Log"
         }
         field(5; "Folder Pah"; Text[100])
         {
-            Caption = 'Folder Pah';
+            Caption = 'Folder Path';
         }
         field(6; Filename; Text[100])
         {
