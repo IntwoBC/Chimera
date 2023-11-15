@@ -45,11 +45,12 @@ page 60002 "Investran Dynamic Stagging"
                     ToolTip = 'Specifies the value of the Security Type field.';
                     ApplicationArea = All;
                 }
-                field("Deal Currency"; Rec."Deal Currency")
-                {
-                    ToolTip = 'Specifies the value of the Deal Currency field.';
-                    ApplicationArea = All;
-                }
+                // field("Deal Currency"; Rec."Deal Currency")
+                // {
+                //     ToolTip = 'Specifies the value of the Deal Currency field.';
+                //     ApplicationArea = All;
+                //     ObsoleteReason = 'Client Asked to Remove this field';
+                // }
                 field("GL Date"; Rec."GL Date")
                 {
                     ToolTip = 'Specifies the value of the GL Date field.';

@@ -20,10 +20,11 @@ table 60000 "Investran - Dyanamic Setup"
             Caption = 'Journal Batch Name';
             TableRelation = "Gen. Journal Batch".Name WHERE("Journal Template Name" = FIELD("Journal Template Name"));
         }
-        field(4; "Investran Legal Entity"; code[100])
+        field(4; "Investran Legal Entity"; code[1000])
         {
             Caption = 'Investran Legal Entity Name';
             DataClassification = ToBeClassified;
+            //Length Increased to 1000 to store multiple company names.
         }
         field(5; "Investran Entity Active"; Boolean)
         {

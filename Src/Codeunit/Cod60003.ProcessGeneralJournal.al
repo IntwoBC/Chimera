@@ -26,7 +26,7 @@ codeunit 60003 "Process General Journal"
         else
             RecGeneralJournalLine.Validate("Account Type", RecGeneralJournalLine."Account Type"::"G/L Account");
         RecGeneralJournalLine.Validate("Account No.", GetGLAccount(Rec));
-        RecGeneralJournalLine.Validate("Currency Code", Rec."Deal Currency");
+        //RecGeneralJournalLine.Validate("Currency Code", Rec."Deal Currency");
         RecGeneralJournalLine.Validate("Debit Amount", Rec.Debits);
         RecGeneralJournalLine.Validate("Credit Amount", Rec.Credits);
         SetShortDim1(Rec);

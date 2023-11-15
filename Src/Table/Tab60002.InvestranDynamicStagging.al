@@ -34,6 +34,8 @@ table 60002 "Investran Dynamic Stagging"
         field(7; "Deal Currency"; Code[10])
         {
             Caption = 'Deal Currency';
+            ObsoleteReason = 'Client asked to remove this field';
+            ObsoleteState = Removed;
         }
         field(8; "GL Date"; Date)
         {

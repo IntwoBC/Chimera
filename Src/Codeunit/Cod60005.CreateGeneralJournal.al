@@ -14,7 +14,9 @@ codeunit 60005 CreateGeneralJournal
         Clear(RecInvestranDynamicStaggingL);
         RecInvestranDynamicStaggingL.SetCurrentKey("Row No");
         RecInvestranDynamicStaggingL.SetAscending("Row No", true);
-        RecInvestranDynamicStaggingL.SetRange("Legal Entity", RecInvestranDynamicSetupL."Investran Legal Entity");
+        //commented and added setfilter as client want to set multiple names for one company.
+        // RecInvestranDynamicStaggingL.SetRange("Legal Entity", RecInvestranDynamicSetupL."Investran Legal Entity");
+        RecInvestranDynamicStaggingL.SetFilter("Legal Entity", RecInvestranDynamicSetupL."Investran Legal Entity");
         RecInvestranDynamicStaggingL.SetRange(Status, RecInvestranDynamicStaggingL.Status::"Ready To Sync");
         if RecInvestranDynamicStaggingL.FindSet() then
             repeat
