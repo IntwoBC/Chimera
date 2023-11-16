@@ -8,7 +8,7 @@ codeunit 60005 CreateGeneralJournal
     begin
         Clear(RecInvestranDynamicSetupL);
         RecInvestranDynamicSetupL.Get();
-        if (RecInvestranDynamicSetupL."Investran Entity Active" = false) OR (RecInvestranDynamicSetupL."Journal Template Name" = '') OR (RecInvestranDynamicSetupL."Journal Batch Name" = '') then
+        if (RecInvestranDynamicSetupL."Investran Entity Active" = false) OR (RecInvestranDynamicSetupL."Journal Template Name" = '') OR (RecInvestranDynamicSetupL."Journal Batch Name" = '') OR (RecInvestranDynamicSetupL."Investran Legal Entity" = '') then
             exit;
 
         Clear(RecInvestranDynamicStaggingL);
@@ -28,6 +28,7 @@ codeunit 60005 CreateGeneralJournal
                 end else begin
                     RecInvestranDynamicStaggingL.Status := RecInvestranDynamicStaggingL.Status::Error;
                     RecInvestranDynamicStaggingL."Error Remarks" := CopyStr(GetLastErrorText, 1, 500);
+                    RecInvestranDynamicStaggingL."Tried in Company" := CompanyName;
                     RecInvestranDynamicStaggingL.Modify();
                 end;
             until RecInvestranDynamicStaggingL.Next() = 0;

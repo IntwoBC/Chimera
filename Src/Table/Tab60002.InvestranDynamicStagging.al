@@ -79,6 +79,10 @@ table 60002 "Investran Dynamic Stagging"
         {
             DataClassification = ToBeClassified;
         }
+        field(18; "Tried in Company"; Text[100])
+        {
+            DataClassification = ToBeClassified;
+        }
     }
     keys
     {

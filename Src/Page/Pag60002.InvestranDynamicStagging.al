@@ -103,6 +103,12 @@ page 60002 "Investran Dynamic Stagging"
                     ApplicationArea = All;
                     Editable = false;
                 }
+                field("Tried in Company"; Rec."Tried in Company")
+                {
+                    ToolTip = 'Specifies the value of the Tried in Company field.';
+                    ApplicationArea = All;
+                    Visible = false;
+                }
             }
         }
     }
