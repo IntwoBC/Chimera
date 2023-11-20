@@ -88,7 +88,9 @@ codeunit 60003 "Process General Journal"
         Clear(GLSetupL);
         GLSetupL.Get();
         DimensionValueL.SetRange("Dimension Code", GLSetupL."Shortcut Dimension 1 Code");
-        DimensionValueL.SetRange("Investran Code Mapping", RecInvestranDynamicStaggingP."Legal Entity");
+        //commented and added setfilter as client want to set multiple Dimension name for one company.
+        //DimensionValueL.SetRange("Investran Code Mapping", RecInvestranDynamicStaggingP."Legal Entity");
+        DimensionValueL.SetFilter("Investran Code Mapping", '%1', '@*' + RecInvestranDynamicStaggingP."Legal Entity" + '*');
         DimensionValueL.FindFirst();
         TempDimensionBuffer."Dimension Code" := DimensionValueL."Dimension Code";
         TempDimensionBuffer."Dimension Value Code" := DimensionValueL.Code;
