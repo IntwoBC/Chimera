@@ -18,5 +18,13 @@ permissionset 60000 "Chimera Development"
         page "SFTP Integration Log" = X,
         page "Investran - Dyanamic Setup" = X,
         page "Investran Dynamic Stagging" = X,
-        report "Import Investran Dynamic" = X;
+        report "Import Investran Dynamic" = X,
+        report "Global Trial Balance Report" = X,
+        report "General Ledger Entries-Global" = X,
+        Page "Global Report Configuration" = X,
+        Page "GL Entries-Global" = X,
+        Table "Global Report Configuration" = X,
+        tabledata "Global Report Configuration" = RMID,
+        table "GL Entries-Global" = X,
+        tabledata "GL Entries-Global" = RMID;
 }
