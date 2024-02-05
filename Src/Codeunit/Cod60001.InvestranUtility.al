@@ -120,4 +120,159 @@ codeunit 60001 InvestranUtility
             Error('Import action has been already performed by UserId: %1, at: %2', SFTPLog."Action Performed By", SFTPLog."Action Performed At");
     end;
 
+    internal procedure UserBasedAllocation(var PurchLine: Record "Purchase Line")
+    var
+        RecPurchLineL: Record "Purchase Line";
+        EmployeeDimensionMatrix: Record "Employee Dimension Matrix";
+        EmployeeDimensionMatrix2: Record "Employee Dimension Matrix";
+        DimSetEntry: Record "Dimension Set Entry";
+        NoOfEmployee, TotalNoOfEmployee, LineNumber : Integer;
+        DepartmentList: List of [Text];
+    begin
+        PurchLine.TestField(Type, PurchLine.Type::"G/L Account");
+        PurchLine.TestField("Amount Including VAT");
+        PurchLine.TestField("Dimension Set ID");
+
+        Clear(DimSetEntry);
+        DimSetEntry.SetRange("Dimension Set ID", PurchLine."Dimension Set ID");
+        DimSetEntry.SetRange("Dimension Code", 'SOFTWARE');
+        DimSetEntry.FindFirst();
+
+        Clear(DepartmentList);
+        LineNumber := GetLastPurchLineN(PurchLine);
+
+        TotalNoOfEmployee := GetTotalNumberOfEmployeeFromMatrix(DimSetEntry."Dimension Value Code", '');
+
+        Clear(EmployeeDimensionMatrix);
+        EmployeeDimensionMatrix.SetRange("Software Dimension", DimSetEntry."Dimension Value Code");
+        if EmployeeDimensionMatrix.FindSet() then begin
+            repeat
+                if not DepartmentList.Contains(EmployeeDimensionMatrix."Department Dimension") then begin
+                    DepartmentList.Add(EmployeeDimensionMatrix."Department Dimension");
+                    Clear(EmployeeDimensionMatrix2);
+                    EmployeeDimensionMatrix2.SetRange("Software Dimension", DimSetEntry."Dimension Value Code");
+                    EmployeeDimensionMatrix2.SetRange("Department Dimension", EmployeeDimensionMatrix."Department Dimension");
+                    if EmployeeDimensionMatrix2.FindSet() then begin
+                        NoOfEmployee := EmployeeDimensionMatrix2.Count();
+                    end;
+                    RecPurchLineL.Init();
+                    RecPurchLineL."Document Type" := PurchLine."Document Type";
+                    RecPurchLineL."Document No." := PurchLine."Document No.";
+                    LineNumber += 10000;
+                    RecPurchLineL."Line No." := LineNumber;
+                    RecPurchLineL.Insert(true);
+                    RecPurchLineL.Validate("Buy-from Vendor No.", PurchLine."Buy-from Vendor No.");
+                    RecPurchLineL.Validate(Type, RecPurchLineL.Type::"G/L Account");
+                    RecPurchLineL.Validate("No.", PurchLine."No.");
+                    RecPurchLineL.Validate(Quantity, NoOfEmployee);
+                    RecPurchLineL.Validate("Direct Unit Cost", PurchLine."Amount Including VAT" / TotalNoOfEmployee);
+                    RecPurchLineL.Validate("Dimension Set ID", InsertDimension(PurchLine."Dimension Set ID", 'SOFTWARE', EmployeeDimensionMatrix."Software Dimension"));
+                    RecPurchLineL.Validate("Dimension Set ID", InsertDimension(PurchLine."Dimension Set ID", 'DEPARTMENT', EmployeeDimensionMatrix."Department Dimension"));
+                    RecPurchLineL.Modify(true);
+                end;
+            until EmployeeDimensionMatrix.Next() = 0;
+        end;
+
+    end;
+
+    local procedure GetTotalNumberOfEmployeeFromMatrix(Software: Text; Department: Text): Integer
+    var
+        EmployeeDimensionMatrix: Record "Employee Dimension Matrix";
+        EmpList: List of [Text];
+        TotalEMployee: Integer;
+    begin
+        Clear(EmpList);
+        Clear(EmployeeDimensionMatrix);
+
+        if Software <> '' then
+            EmployeeDimensionMatrix.SetRange("Software Dimension", Software)
+        else
+            if Department <> '' then
+                EmployeeDimensionMatrix.SetRange("Department Dimension", Department)
+            else
+                EmployeeDimensionMatrix.SetFilter("Department Dimension", '<>%1', '');
+
+
+        if EmployeeDimensionMatrix.FindSet() then begin
+            repeat
+                if not EmpList.Contains(EmployeeDimensionMatrix."Employee Code") then begin
+                    EmpList.Add(EmployeeDimensionMatrix."Employee Code");
+                    TotalEMployee += 1;
+                end;
+            until EmployeeDimensionMatrix.Next() = 0;
+        end;
+        exit(TotalEMployee);
+    end;
+
+    internal procedure HeadCountAllocation(var PurchLine: Record "Purchase Line")
+    var
+        RecPurchLineL: Record "Purchase Line";
+        EmployeeDimensionMatrix: Record "Employee Dimension Matrix";
+        EmployeeDimensionMatrix2: Record "Employee Dimension Matrix";
+        //DimSetEntry: Record "Dimension Set Entry";
+        NoOfEmployee, TotalNoOfEmployee, LineNumber : Integer;
+        DepartmentList: List of [Text];
+    begin
+        PurchLine.TestField(Type, PurchLine.Type::"G/L Account");
+        PurchLine.TestField("Amount Including VAT");
+
+        Clear(DepartmentList);
+        LineNumber := GetLastPurchLineN(PurchLine);
+
+        TotalNoOfEmployee := GetTotalNumberOfEmployeeFromMatrix('', '');
+
+        Clear(EmployeeDimensionMatrix);
+        if EmployeeDimensionMatrix.FindSet() then begin
+            repeat
+                if not DepartmentList.Contains(EmployeeDimensionMatrix."Department Dimension") then begin
+                    DepartmentList.Add(EmployeeDimensionMatrix."Department Dimension");
+
+                    NoOfEmployee := GetTotalNumberOfEmployeeFromMatrix('', EmployeeDimensionMatrix."Department Dimension");
+
+                    RecPurchLineL.Init();
+                    RecPurchLineL."Document Type" := PurchLine."Document Type";
+                    RecPurchLineL."Document No." := PurchLine."Document No.";
+                    LineNumber += 10000;
+                    RecPurchLineL."Line No." := LineNumber;
+                    RecPurchLineL.Insert(true);
+                    RecPurchLineL.Validate("Buy-from Vendor No.", PurchLine."Buy-from Vendor No.");
+                    RecPurchLineL.Validate(Type, RecPurchLineL.Type::"G/L Account");
+                    RecPurchLineL.Validate("No.", PurchLine."No.");
+                    RecPurchLineL.Validate(Quantity, NoOfEmployee);
+                    RecPurchLineL.Validate("Direct Unit Cost", PurchLine."Amount Including VAT" / TotalNoOfEmployee);
+                    RecPurchLineL.Validate("Dimension Set ID", InsertDimension(PurchLine."Dimension Set ID", 'DEPARTMENT', EmployeeDimensionMatrix."Department Dimension"));
+                    RecPurchLineL.Modify(true);
+                end;
+            until EmployeeDimensionMatrix.Next() = 0;
+        end;
+
+    end;
+
+    local procedure GetLastPurchLineN(var PurchLine: Record "Purchase Line"): Integer
+    var
+        RecPurchLineL: Record "Purchase Line";
+    begin
+        Clear(RecPurchLineL);
+        RecPurchLineL.SetCurrentKey("Document Type", "Document No.", "Line No.");
+        RecPurchLineL.SetRange("Document Type", PurchLine."Document Type");
+        RecPurchLineL.SetRange("Document No.", PurchLine."Document No.");
+        if RecPurchLineL.FindLast() then
+            exit(RecPurchLineL."Line No.")
+        else
+            exit(0);
+    end;
+
+    internal procedure InsertDimension(DimensionSetId: Integer; "DimensionCode": code[20]; DimVal: code[20]): Integer
+    var
+        DimSetEntryTemp: Record "Dimension Set Entry" temporary;
+        DimensionManagementCU: Codeunit DimensionManagement;
+    begin
+        DimensionManagementCU.GetDimensionSet(DimSetEntryTemp, DimensionSetId);
+        if DimSetEntryTemp.Get(DimensionSetId, DimensionCode) then
+            DimSetEntryTemp.Delete();
+        DimSetEntryTemp."Dimension Code" := DimensionCode;
+        DimSetEntryTemp."Dimension Value Code" := DimVal;
+        if DimSetEntryTemp.Insert(true) then;
+        exit(DimensionManagementCU.GetDimensionSetID(DimSetEntryTemp));
+    end;
 }
