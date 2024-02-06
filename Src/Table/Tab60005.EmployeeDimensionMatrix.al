@@ -8,7 +8,7 @@ table 60005 "Employee Dimension Matrix"
         field(1; "Employee Code"; Code[20])
         {
             Caption = 'Employee Code';
-            TableRelation = "Dimension Value" where("Dimension Code" = filter('EMPLOYEENAME'));
+            TableRelation = "Dimension Value".Code where("Dimension Code" = filter('EMPLOYEENAME'));
             trigger OnValidate()
             var
                 DimVal: Record "Dimension Value";
@@ -29,12 +29,12 @@ table 60005 "Employee Dimension Matrix"
         field(3; "Software Dimension"; Code[20])
         {
             Caption = 'Software Dimension';
-            TableRelation = "Dimension Value" where("Dimension Code" = filter('SOFTWARE'));
+            TableRelation = "Dimension Value".Code where("Dimension Code" = filter('SOFTWARE'));
         }
         field(4; "Department Dimension"; Code[20])
         {
             Caption = 'Department Dimension';
-            TableRelation = "Dimension Value" where("Dimension Code" = filter('DEPARTMENT'));
+            TableRelation = "Dimension Value".Code where("Dimension Code" = filter('DEPARTMENT'));
         }
     }
     keys

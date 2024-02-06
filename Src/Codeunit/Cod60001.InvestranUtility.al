@@ -138,6 +138,9 @@ codeunit 60001 InvestranUtility
         DimSetEntry.SetRange("Dimension Code", 'SOFTWARE');
         DimSetEntry.FindFirst();
 
+        PurchLine."UserBased Allocation" := true;
+        PurchLine.Modify();
+
         Clear(DepartmentList);
         LineNumber := GetLastPurchLineN(PurchLine);
 
@@ -168,6 +171,8 @@ codeunit 60001 InvestranUtility
                     RecPurchLineL.Validate("Direct Unit Cost", PurchLine."Amount Including VAT" / TotalNoOfEmployee);
                     RecPurchLineL.Validate("Dimension Set ID", InsertDimension(PurchLine."Dimension Set ID", 'SOFTWARE', EmployeeDimensionMatrix."Software Dimension"));
                     RecPurchLineL.Validate("Dimension Set ID", InsertDimension(PurchLine."Dimension Set ID", 'DEPARTMENT', EmployeeDimensionMatrix."Department Dimension"));
+                    RecPurchLineL."UserBased Allocation" := true;
+                    RecPurchLineL."Derived From Line No." := PurchLine."Line No.";
                     RecPurchLineL.Modify(true);
                 end;
             until EmployeeDimensionMatrix.Next() = 0;
@@ -219,6 +224,9 @@ codeunit 60001 InvestranUtility
         Clear(DepartmentList);
         LineNumber := GetLastPurchLineN(PurchLine);
 
+        PurchLine."HeadCount Allocation" := true;
+        PurchLine.Modify();
+
         TotalNoOfEmployee := GetTotalNumberOfEmployeeFromMatrix('', '');
 
         Clear(EmployeeDimensionMatrix);
@@ -241,6 +249,8 @@ codeunit 60001 InvestranUtility
                     RecPurchLineL.Validate(Quantity, NoOfEmployee);
                     RecPurchLineL.Validate("Direct Unit Cost", PurchLine."Amount Including VAT" / TotalNoOfEmployee);
                     RecPurchLineL.Validate("Dimension Set ID", InsertDimension(PurchLine."Dimension Set ID", 'DEPARTMENT', EmployeeDimensionMatrix."Department Dimension"));
+                    RecPurchLineL."HeadCount Allocation" := true;
+                    RecPurchLineL."Derived From Line No." := PurchLine."Line No.";
                     RecPurchLineL.Modify(true);
                 end;
             until EmployeeDimensionMatrix.Next() = 0;
@@ -274,5 +284,133 @@ codeunit 60001 InvestranUtility
         DimSetEntryTemp."Dimension Value Code" := DimVal;
         if DimSetEntryTemp.Insert(true) then;
         exit(DimensionManagementCU.GetDimensionSetID(DimSetEntryTemp));
+    end;
+
+    internal procedure UpdateCostAllocationPercentage(var SqFtAllocation: Record "Square Foot Allocation Matrix")
+    var
+        SqFtAllocationL: Record "Square Foot Allocation Matrix";
+    begin
+        SqFtAllocation.CalcFields("Total Space of Department");
+        Clear(SqFtAllocationL);
+        SqFtAllocationL.SetFilter(Department, '<>%1', '');
+        if SqFtAllocationL.FindSet() then begin
+            repeat
+                if SqFtAllocation."Total Space of Department" <> 0 then
+                    SqFtAllocationL."% For Cost Allocation" := (SqFtAllocationL."Space Per Department" / SqFtAllocation."Total Space of Department") * 100
+                else
+                    SqFtAllocationL."% For Cost Allocation" := 0;
+                SqFtAllocationL.Modify();
+            until SqFtAllocationL.Next() = 0;
+        end
+    end;
+
+    internal procedure SqareFootAllocation(var PurchLine: Record "Purchase Line")
+    var
+        SqFtAllocationL: Record "Square Foot Allocation Matrix";
+        RecPurchLineL: Record "Purchase Line";
+        LineNumber: Integer;
+    begin
+        PurchLine.TestField(Type, PurchLine.Type::"G/L Account");
+        PurchLine.TestField("Amount Including VAT");
+        LineNumber := GetLastPurchLineN(PurchLine);
+
+        PurchLine."SquareFoot Allocation" := true;
+        PurchLine.Modify();
+
+        Clear(SqFtAllocationL);
+        SqFtAllocationL.SetFilter(Department, '<>%1', '');
+        if SqFtAllocationL.FindSet() then begin
+            repeat
+                RecPurchLineL.Init();
+                RecPurchLineL."Document Type" := PurchLine."Document Type";
+                RecPurchLineL."Document No." := PurchLine."Document No.";
+                LineNumber += 10000;
+                RecPurchLineL."Line No." := LineNumber;
+                RecPurchLineL.Insert(true);
+                RecPurchLineL.Validate("Buy-from Vendor No.", PurchLine."Buy-from Vendor No.");
+                RecPurchLineL.Validate(Type, RecPurchLineL.Type::"G/L Account");
+                RecPurchLineL.Validate("No.", PurchLine."No.");
+                RecPurchLineL.Validate(Quantity, 1);
+                RecPurchLineL.Validate("Direct Unit Cost", (PurchLine."Amount Including VAT" * SqFtAllocationL."% For Cost Allocation") / 100);
+                RecPurchLineL.Validate("Dimension Set ID", InsertDimension(PurchLine."Dimension Set ID", 'DEPARTMENT', SqFtAllocationL.Department));
+                RecPurchLineL."SquareFoot Allocation" := true;
+                RecPurchLineL."Derived From Line No." := PurchLine."Line No.";
+                RecPurchLineL.Modify(true);
+            until SqFtAllocationL.Next() = 0;
+        end;
+    end;
+
+
+    internal procedure ProductTypeBasedAllocation(var PurchLine: Record "Purchase Line")
+    var
+        ProductRelation: Record "Product Relations";
+        RecPurchLineL: Record "Purchase Line";
+        DimSetEntry: Record "Dimension Set Entry";
+        NoOfEmployee, TotalNoOfEmployee, LineNumber : Integer;
+    begin
+        PurchLine.TestField(Type, PurchLine.Type::"G/L Account");
+        PurchLine.TestField("Amount Including VAT");
+        PurchLine.TestField("Dimension Set ID");
+
+        Clear(DimSetEntry);
+        DimSetEntry.SetRange("Dimension Set ID", PurchLine."Dimension Set ID");
+        DimSetEntry.SetRange("Dimension Code", 'TYPEOFPRODUCT');
+        DimSetEntry.FindFirst();
+
+        PurchLine."Product Type Based Allocation" := true;
+        PurchLine.Modify();
+
+        LineNumber := GetLastPurchLineN(PurchLine);
+
+        Clear(ProductRelation);
+        ProductRelation.SetRange("Product Type", DimSetEntry."Dimension Value Code");
+        if ProductRelation.FindSet() then begin
+            TotalNoOfEmployee := ProductRelation.Count();
+            repeat
+                RecPurchLineL.Init();
+                RecPurchLineL."Document Type" := PurchLine."Document Type";
+                RecPurchLineL."Document No." := PurchLine."Document No.";
+                LineNumber += 10000;
+                RecPurchLineL."Line No." := LineNumber;
+                RecPurchLineL.Insert(true);
+                RecPurchLineL.Validate("Buy-from Vendor No.", PurchLine."Buy-from Vendor No.");
+                RecPurchLineL.Validate(Type, RecPurchLineL.Type::"G/L Account");
+                RecPurchLineL.Validate("No.", PurchLine."No.");
+                RecPurchLineL.Validate(Quantity, 1);
+                RecPurchLineL.Validate("Direct Unit Cost", PurchLine."Amount Including VAT" / TotalNoOfEmployee);
+                RecPurchLineL.Validate("Dimension Set ID", InsertDimension(PurchLine."Dimension Set ID", 'TYPEOFPRODUCT', ProductRelation."Product Type"));
+                RecPurchLineL.Validate("Dimension Set ID", InsertDimension(PurchLine."Dimension Set ID", 'NAMEOFPRODUCT', ProductRelation."Product Name"));
+                RecPurchLineL."Product Type Based Allocation" := true;
+                RecPurchLineL."Derived From Line No." := PurchLine."Line No.";
+                RecPurchLineL.Modify(true);
+            until ProductRelation.Next() = 0;
+        end;
+    end;
+
+    [EventSubscriber(ObjectType::Table, Database::"Square Foot Allocation Matrix", 'OnAfterInsertEvent', '', false, false)]
+    local procedure SqftOnInsert(var Rec: Record "Square Foot Allocation Matrix"; RunTrigger: Boolean)
+    var
+        Utility: Codeunit InvestranUtility;
+    begin
+        if RunTrigger then
+            Utility.UpdateCostAllocationPercentage(Rec);
+    end;
+
+    [EventSubscriber(ObjectType::Table, Database::"Square Foot Allocation Matrix", 'OnAfterModifyEvent', '', false, false)]
+    local procedure SqftOnModify(var Rec: Record "Square Foot Allocation Matrix"; var xRec: Record "Square Foot Allocation Matrix"; RunTrigger: Boolean)
+    var
+        Utility: Codeunit InvestranUtility;
+    begin
+        if RunTrigger then
+            Utility.UpdateCostAllocationPercentage(Rec);
+    end;
+
+    [EventSubscriber(ObjectType::Table, Database::"Square Foot Allocation Matrix", 'OnAfterDeleteEvent', '', false, false)]
+    local procedure SqftOnDelete(var Rec: Record "Square Foot Allocation Matrix"; RunTrigger: Boolean)
+    var
+        Utility: Codeunit InvestranUtility;
+    begin
+        if RunTrigger then
+            Utility.UpdateCostAllocationPercentage(Rec);
     end;
 }
