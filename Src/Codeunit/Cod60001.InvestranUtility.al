@@ -176,6 +176,7 @@ codeunit 60001 InvestranUtility
                     RecPurchLineL.Modify(true);
                 end;
             until EmployeeDimensionMatrix.Next() = 0;
+            PurchLine.Delete(true);
         end;
 
     end;
@@ -254,8 +255,8 @@ codeunit 60001 InvestranUtility
                     RecPurchLineL.Modify(true);
                 end;
             until EmployeeDimensionMatrix.Next() = 0;
+            PurchLine.Delete(true);
         end;
-
     end;
 
     local procedure GetLastPurchLineN(var PurchLine: Record "Purchase Line"): Integer
@@ -313,7 +314,7 @@ codeunit 60001 InvestranUtility
         PurchLine.TestField(Type, PurchLine.Type::"G/L Account");
         PurchLine.TestField("Amount Including VAT");
         LineNumber := GetLastPurchLineN(PurchLine);
-
+        UpdateCostAllocationPercentage(SqFtAllocationL);
         PurchLine."SquareFoot Allocation" := true;
         PurchLine.Modify();
 
@@ -337,7 +338,9 @@ codeunit 60001 InvestranUtility
                 RecPurchLineL."Derived From Line No." := PurchLine."Line No.";
                 RecPurchLineL.Modify(true);
             until SqFtAllocationL.Next() = 0;
+            PurchLine.Delete(true);
         end;
+
     end;
 
 
@@ -384,6 +387,7 @@ codeunit 60001 InvestranUtility
                 RecPurchLineL."Derived From Line No." := PurchLine."Line No.";
                 RecPurchLineL.Modify(true);
             until ProductRelation.Next() = 0;
+            PurchLine.Delete(true);
         end;
     end;
 
