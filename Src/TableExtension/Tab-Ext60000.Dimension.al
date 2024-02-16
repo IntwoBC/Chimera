@@ -2,7 +2,7 @@ tableextension 60000 DimensionValue extends "Dimension Value"
 {
     fields
     {
-        field(50100; "Investran Code Mapping"; code[50])
+        field(50100; "Investran Code Mapping"; code[1000])
         {
             Caption = 'Investran Code Mapping';
             DataClassification = ToBeClassified;
