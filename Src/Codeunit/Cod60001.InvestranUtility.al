@@ -287,17 +287,18 @@ codeunit 60001 InvestranUtility
         exit(DimensionManagementCU.GetDimensionSetID(DimSetEntryTemp));
     end;
 
-    internal procedure UpdateCostAllocationPercentage(var SqFtAllocation: Record "Square Foot Allocation Matrix")
+    internal procedure UpdateCostAllocationPercentage(var RecBuilding: Record "Building List")
     var
         SqFtAllocationL: Record "Square Foot Allocation Matrix";
     begin
-        SqFtAllocation.CalcFields("Total Space of Department");
+        RecBuilding.CalcFields("Total Space of Department");
         Clear(SqFtAllocationL);
+        SqFtAllocationL.SetRange("Building Name", RecBuilding.Name);
         SqFtAllocationL.SetFilter(Department, '<>%1', '');
         if SqFtAllocationL.FindSet() then begin
             repeat
-                if SqFtAllocation."Total Space of Department" <> 0 then
-                    SqFtAllocationL."% For Cost Allocation" := (SqFtAllocationL."Space Per Department" / SqFtAllocation."Total Space of Department") * 100
+                if RecBuilding."Total Space of Department" <> 0 then
+                    SqFtAllocationL."% For Cost Allocation" := (SqFtAllocationL."Space Per Department" / RecBuilding."Total Space of Department") * 100
                 else
                     SqFtAllocationL."% For Cost Allocation" := 0;
                 SqFtAllocationL.Modify();
@@ -310,37 +311,46 @@ codeunit 60001 InvestranUtility
         SqFtAllocationL: Record "Square Foot Allocation Matrix";
         RecPurchLineL: Record "Purchase Line";
         LineNumber: Integer;
+        RecBuilding: Record "Building List";
+        BuildingPage: Page "Building List";
     begin
         PurchLine.TestField(Type, PurchLine.Type::"G/L Account");
         PurchLine.TestField("Amount Including VAT");
-        LineNumber := GetLastPurchLineN(PurchLine);
-        UpdateCostAllocationPercentage(SqFtAllocationL);
-        PurchLine."SquareFoot Allocation" := true;
-        PurchLine.Modify();
+        Clear(RecBuilding);
+        BuildingPage.SetTableView(RecBuilding);
+        BuildingPage.LookupMode(true);
+        if BuildingPage.RunModal() = Action::LookupOK then begin
+            BuildingPage.GetRecord(RecBuilding);
+            if not Confirm('Go ahead?', false) then exit;
+            LineNumber := GetLastPurchLineN(PurchLine);
+            UpdateCostAllocationPercentage(RecBuilding);
+            PurchLine."SquareFoot Allocation" := true;
+            PurchLine.Modify();
 
-        Clear(SqFtAllocationL);
-        SqFtAllocationL.SetFilter(Department, '<>%1', '');
-        if SqFtAllocationL.FindSet() then begin
-            repeat
-                RecPurchLineL.Init();
-                RecPurchLineL."Document Type" := PurchLine."Document Type";
-                RecPurchLineL."Document No." := PurchLine."Document No.";
-                LineNumber += 10000;
-                RecPurchLineL."Line No." := LineNumber;
-                RecPurchLineL.Insert(true);
-                RecPurchLineL.Validate("Buy-from Vendor No.", PurchLine."Buy-from Vendor No.");
-                RecPurchLineL.Validate(Type, RecPurchLineL.Type::"G/L Account");
-                RecPurchLineL.Validate("No.", PurchLine."No.");
-                RecPurchLineL.Validate(Quantity, 1);
-                RecPurchLineL.Validate("Direct Unit Cost", (PurchLine."Amount Including VAT" * SqFtAllocationL."% For Cost Allocation") / 100);
-                RecPurchLineL.Validate("Dimension Set ID", InsertDimension(PurchLine."Dimension Set ID", 'DEPARTMENT', SqFtAllocationL.Department));
-                RecPurchLineL."SquareFoot Allocation" := true;
-                RecPurchLineL."Derived From Line No." := PurchLine."Line No.";
-                RecPurchLineL.Modify(true);
-            until SqFtAllocationL.Next() = 0;
-            PurchLine.Delete(true);
+            Clear(SqFtAllocationL);
+            SqFtAllocationL.SetRange("Building Name", RecBuilding.Name);
+            SqFtAllocationL.SetFilter(Department, '<>%1', '');
+            if SqFtAllocationL.FindSet() then begin
+                repeat
+                    RecPurchLineL.Init();
+                    RecPurchLineL."Document Type" := PurchLine."Document Type";
+                    RecPurchLineL."Document No." := PurchLine."Document No.";
+                    LineNumber += 10000;
+                    RecPurchLineL."Line No." := LineNumber;
+                    RecPurchLineL.Insert(true);
+                    RecPurchLineL.Validate("Buy-from Vendor No.", PurchLine."Buy-from Vendor No.");
+                    RecPurchLineL.Validate(Type, RecPurchLineL.Type::"G/L Account");
+                    RecPurchLineL.Validate("No.", PurchLine."No.");
+                    RecPurchLineL.Validate(Quantity, 1);
+                    RecPurchLineL.Validate("Direct Unit Cost", (PurchLine."Amount Including VAT" * SqFtAllocationL."% For Cost Allocation") / 100);
+                    RecPurchLineL.Validate("Dimension Set ID", InsertDimension(PurchLine."Dimension Set ID", 'DEPARTMENT', SqFtAllocationL.Department));
+                    RecPurchLineL."SquareFoot Allocation" := true;
+                    RecPurchLineL."Derived From Line No." := PurchLine."Line No.";
+                    RecPurchLineL.Modify(true);
+                until SqFtAllocationL.Next() = 0;
+                PurchLine.Delete(true);
+            end;
         end;
-
     end;
 
 
@@ -395,26 +405,259 @@ codeunit 60001 InvestranUtility
     local procedure SqftOnInsert(var Rec: Record "Square Foot Allocation Matrix"; RunTrigger: Boolean)
     var
         Utility: Codeunit InvestranUtility;
+        RecBuilding: Record "Building List";
     begin
-        if RunTrigger then
-            Utility.UpdateCostAllocationPercentage(Rec);
+        if Rec."Building Name" <> '' then begin
+            RecBuilding.GET(Rec."Building Name");
+            if RunTrigger then
+                Utility.UpdateCostAllocationPercentage(RecBuilding);
+        end;
+
     end;
 
     [EventSubscriber(ObjectType::Table, Database::"Square Foot Allocation Matrix", 'OnAfterModifyEvent', '', false, false)]
     local procedure SqftOnModify(var Rec: Record "Square Foot Allocation Matrix"; var xRec: Record "Square Foot Allocation Matrix"; RunTrigger: Boolean)
     var
         Utility: Codeunit InvestranUtility;
+        RecBuilding: Record "Building List";
     begin
-        if RunTrigger then
-            Utility.UpdateCostAllocationPercentage(Rec);
+        if Rec."Building Name" <> '' then begin
+            RecBuilding.GET(Rec."Building Name");
+            if RunTrigger then
+                Utility.UpdateCostAllocationPercentage(RecBuilding);
+        end;
     end;
 
     [EventSubscriber(ObjectType::Table, Database::"Square Foot Allocation Matrix", 'OnAfterDeleteEvent', '', false, false)]
     local procedure SqftOnDelete(var Rec: Record "Square Foot Allocation Matrix"; RunTrigger: Boolean)
     var
         Utility: Codeunit InvestranUtility;
+        RecBuilding: Record "Building List";
     begin
-        if RunTrigger then
-            Utility.UpdateCostAllocationPercentage(Rec);
+        if Rec."Building Name" <> '' then begin
+            RecBuilding.GET(Rec."Building Name");
+            if RunTrigger then
+                Utility.UpdateCostAllocationPercentage(RecBuilding);
+        end;
+    end;
+
+
+    internal procedure UserBasedAllocationForGenJnl(var GenJnlLine: Record "Gen. Journal Line")
+    var
+        RecGenJnlLineL: Record "Gen. Journal Line";
+        EmployeeDimensionMatrix: Record "Employee Dimension Matrix";
+        EmployeeDimensionMatrix2: Record "Employee Dimension Matrix";
+        DimSetEntry: Record "Dimension Set Entry";
+        NoOfEmployee, TotalNoOfEmployee, LineNumber : Integer;
+        DepartmentList: List of [Text];
+    begin
+        GenJnlLine.TestField("Account Type", GenJnlLine."Account Type"::"G/L Account");
+        GenJnlLine.TestField(Amount);
+        GenJnlLine.TestField("Dimension Set ID");
+
+        Clear(DimSetEntry);
+        DimSetEntry.SetRange("Dimension Set ID", GenJnlLine."Dimension Set ID");
+        DimSetEntry.SetRange("Dimension Code", 'SOFTWARE');
+        DimSetEntry.FindFirst();
+
+        GenJnlLine."UserBased Allocation" := true;
+        GenJnlLine.Modify();
+
+        Clear(DepartmentList);
+        LineNumber := GetLastLineForGenJournal(GenJnlLine);
+
+        TotalNoOfEmployee := GetTotalNumberOfEmployeeFromMatrix(DimSetEntry."Dimension Value Code", '');
+
+        Clear(EmployeeDimensionMatrix);
+        EmployeeDimensionMatrix.SetRange("Software Dimension", DimSetEntry."Dimension Value Code");
+        if EmployeeDimensionMatrix.FindSet() then begin
+            repeat
+                if not DepartmentList.Contains(EmployeeDimensionMatrix."Department Dimension") then begin
+                    DepartmentList.Add(EmployeeDimensionMatrix."Department Dimension");
+                    Clear(EmployeeDimensionMatrix2);
+                    EmployeeDimensionMatrix2.SetRange("Software Dimension", DimSetEntry."Dimension Value Code");
+                    EmployeeDimensionMatrix2.SetRange("Department Dimension", EmployeeDimensionMatrix."Department Dimension");
+                    if EmployeeDimensionMatrix2.FindSet() then begin
+                        NoOfEmployee := EmployeeDimensionMatrix2.Count();
+                    end;
+                    RecGenJnlLineL.Init();
+                    RecGenJnlLineL.TransferFields(GenJnlLine);
+                    RecGenJnlLineL."Journal Template Name" := GenJnlLine."Journal Template Name";
+                    RecGenJnlLineL."Journal Batch Name" := GenJnlLine."Journal Batch Name";
+                    RecGenJnlLineL."Document Type" := GenJnlLine."Document Type";
+                    RecGenJnlLineL."Document No." := GenJnlLine."Document No.";
+                    LineNumber += 10000;
+                    RecGenJnlLineL."Line No." := LineNumber;
+                    RecGenJnlLineL.Insert(true);
+                    RecGenJnlLineL.Validate(Quantity, NoOfEmployee);
+                    RecGenJnlLineL.Validate("Amount", (GenJnlLine.Amount / TotalNoOfEmployee) * NoOfEmployee);
+                    RecGenJnlLineL.Validate("Dimension Set ID", InsertDimension(GenJnlLine."Dimension Set ID", 'SOFTWARE', EmployeeDimensionMatrix."Software Dimension"));
+                    RecGenJnlLineL.Validate("Dimension Set ID", InsertDimension(GenJnlLine."Dimension Set ID", 'DEPARTMENT', EmployeeDimensionMatrix."Department Dimension"));
+                    RecGenJnlLineL."UserBased Allocation" := true;
+                    RecGenJnlLineL."Derived From Line No." := GenJnlLine."Line No.";
+                    RecGenJnlLineL.Modify(true);
+                end;
+            until EmployeeDimensionMatrix.Next() = 0;
+            GenJnlLine.Delete(true);
+        end;
+
+    end;
+
+    internal procedure HeadCountAllocationForGenJnl(var GenJnlLine: Record "Gen. Journal Line")
+    var
+        RecGenJnlLineL: Record "Gen. Journal Line";
+        EmployeeDimensionMatrix: Record "Employee Dimension Matrix";
+        EmployeeDimensionMatrix2: Record "Employee Dimension Matrix";
+        //DimSetEntry: Record "Dimension Set Entry";
+        NoOfEmployee, TotalNoOfEmployee, LineNumber : Integer;
+        DepartmentList: List of [Text];
+    begin
+        GenJnlLine.TestField("Account Type", GenJnlLine."Account Type"::"G/L Account");
+        GenJnlLine.TestField(Amount);
+
+        Clear(DepartmentList);
+        LineNumber := GetLastLineForGenJournal(GenJnlLine);
+
+        GenJnlLine."HeadCount Allocation" := true;
+        GenJnlLine.Modify();
+
+        TotalNoOfEmployee := GetTotalNumberOfEmployeeFromMatrix('', '');
+
+        Clear(EmployeeDimensionMatrix);
+        if EmployeeDimensionMatrix.FindSet() then begin
+            repeat
+                if not DepartmentList.Contains(EmployeeDimensionMatrix."Department Dimension") then begin
+                    DepartmentList.Add(EmployeeDimensionMatrix."Department Dimension");
+
+                    NoOfEmployee := GetTotalNumberOfEmployeeFromMatrix('', EmployeeDimensionMatrix."Department Dimension");
+
+                    RecGenJnlLineL.Init();
+                    RecGenJnlLineL.TransferFields(GenJnlLine);
+                    RecGenJnlLineL."Journal Template Name" := GenJnlLine."Journal Template Name";
+                    RecGenJnlLineL."Journal Batch Name" := GenJnlLine."Journal Batch Name";
+                    RecGenJnlLineL."Document Type" := GenJnlLine."Document Type";
+                    RecGenJnlLineL."Document No." := GenJnlLine."Document No.";
+                    LineNumber += 10000;
+                    RecGenJnlLineL."Line No." := LineNumber;
+                    RecGenJnlLineL.Insert(true);
+                    RecGenJnlLineL.Validate(Quantity, NoOfEmployee);
+                    RecGenJnlLineL.Validate(Amount, (GenJnlLine.Amount / TotalNoOfEmployee) * NoOfEmployee);
+                    RecGenJnlLineL.Validate("Dimension Set ID", InsertDimension(GenJnlLine."Dimension Set ID", 'DEPARTMENT', EmployeeDimensionMatrix."Department Dimension"));
+                    RecGenJnlLineL."HeadCount Allocation" := true;
+                    RecGenJnlLineL."Derived From Line No." := GenJnlLine."Line No.";
+                    RecGenJnlLineL.Modify(true);
+                end;
+            until EmployeeDimensionMatrix.Next() = 0;
+            GenJnlLine.Delete(true);
+        end;
+    end;
+
+    internal procedure SqareFootAllocationForGenJnl(var GenJnlLine: Record "Gen. Journal Line")
+    var
+        SqFtAllocationL: Record "Square Foot Allocation Matrix";
+        RecGenJnlLineL: Record "Gen. Journal Line";
+        LineNumber: Integer;
+        RecBuilding: Record "Building List";
+        BuildingPage: Page "Building List";
+    begin
+        GenJnlLine.TestField("Account Type", GenJnlLine."Account Type"::"G/L Account");
+        GenJnlLine.TestField(Amount);
+        Clear(RecBuilding);
+        BuildingPage.SetTableView(RecBuilding);
+        BuildingPage.LookupMode(true);
+        if BuildingPage.RunModal() = Action::LookupOK then begin
+            BuildingPage.GetRecord(RecBuilding);
+            if not Confirm('Go ahead?', false) then exit;
+            LineNumber := GetLastLineForGenJournal(GenJnlLine);
+            UpdateCostAllocationPercentage(RecBuilding);
+            GenJnlLine."SquareFoot Allocation" := true;
+            GenJnlLine.Modify();
+
+            Clear(SqFtAllocationL);
+            SqFtAllocationL.SetRange("Building Name", RecBuilding.Name);
+            SqFtAllocationL.SetFilter(Department, '<>%1', '');
+            if SqFtAllocationL.FindSet() then begin
+                repeat
+                    RecGenJnlLineL.Init();
+                    RecGenJnlLineL.TransferFields(GenJnlLine);
+                    RecGenJnlLineL."Journal Template Name" := GenJnlLine."Journal Template Name";
+                    RecGenJnlLineL."Journal Batch Name" := GenJnlLine."Journal Batch Name";
+                    RecGenJnlLineL."Document Type" := GenJnlLine."Document Type";
+                    RecGenJnlLineL."Document No." := GenJnlLine."Document No.";
+                    LineNumber += 10000;
+                    RecGenJnlLineL."Line No." := LineNumber;
+                    RecGenJnlLineL.Insert(true);
+                    RecGenJnlLineL.Validate(Quantity, 1);
+                    RecGenJnlLineL.Validate(Amount, (GenJnlLine.Amount * SqFtAllocationL."% For Cost Allocation") / 100);
+                    RecGenJnlLineL.Validate("Dimension Set ID", InsertDimension(GenJnlLine."Dimension Set ID", 'DEPARTMENT', SqFtAllocationL.Department));
+                    RecGenJnlLineL."SquareFoot Allocation" := true;
+                    RecGenJnlLineL."Derived From Line No." := GenJnlLine."Line No.";
+                    RecGenJnlLineL.Modify(true);
+                until SqFtAllocationL.Next() = 0;
+                GenJnlLine.Delete(true);
+            end;
+        end;
+    end;
+
+
+    internal procedure ProductTypeBasedAllocationForGenJnl(var GenJnlLine: Record "Gen. Journal Line")
+    var
+        ProductRelation: Record "Product Relations";
+        RecGenJnlLineL: Record "Gen. Journal Line";
+        DimSetEntry: Record "Dimension Set Entry";
+        NoOfEmployee, TotalNoOfEmployee, LineNumber : Integer;
+    begin
+        GenJnlLine.TestField("Account Type", GenJnlLine."Account Type"::"G/L Account");
+        GenJnlLine.TestField(Amount);
+        GenJnlLine.TestField("Dimension Set ID");
+
+        Clear(DimSetEntry);
+        DimSetEntry.SetRange("Dimension Set ID", GenJnlLine."Dimension Set ID");
+        DimSetEntry.SetRange("Dimension Code", 'TYPEOFPRODUCT');
+        DimSetEntry.FindFirst();
+
+        GenJnlLine."Product Type Based Allocation" := true;
+        GenJnlLine.Modify();
+
+        LineNumber := GetLastLineForGenJournal(GenJnlLine);
+
+        Clear(ProductRelation);
+        ProductRelation.SetRange("Product Type", DimSetEntry."Dimension Value Code");
+        if ProductRelation.FindSet() then begin
+            TotalNoOfEmployee := ProductRelation.Count();
+            repeat
+                RecGenJnlLineL.Init();
+                RecGenJnlLineL.TransferFields(GenJnlLine);
+                RecGenJnlLineL."Journal Template Name" := GenJnlLine."Journal Template Name";
+                RecGenJnlLineL."Journal Batch Name" := GenJnlLine."Journal Batch Name";
+                RecGenJnlLineL."Document Type" := GenJnlLine."Document Type";
+                RecGenJnlLineL."Document No." := GenJnlLine."Document No.";
+                LineNumber += 10000;
+                RecGenJnlLineL."Line No." := LineNumber;
+                RecGenJnlLineL.Insert(true);
+                RecGenJnlLineL.Validate(Quantity, 1);
+                RecGenJnlLineL.Validate(Amount, GenJnlLine.Amount / TotalNoOfEmployee);
+                RecGenJnlLineL.Validate("Dimension Set ID", InsertDimension(GenJnlLine."Dimension Set ID", 'TYPEOFPRODUCT', ProductRelation."Product Type"));
+                RecGenJnlLineL.Validate("Dimension Set ID", InsertDimension(GenJnlLine."Dimension Set ID", 'NAMEOFPRODUCT', ProductRelation."Product Name"));
+                RecGenJnlLineL."Product Type Based Allocation" := true;
+                RecGenJnlLineL."Derived From Line No." := GenJnlLine."Line No.";
+                RecGenJnlLineL.Modify(true);
+            until ProductRelation.Next() = 0;
+            GenJnlLine.Delete(true);
+        end;
+    end;
+
+    local procedure GetLastLineForGenJournal(var RecGenJnlLine: Record "Gen. Journal Line"): Integer
+    var
+        RecGenJnlLineL: Record "Gen. Journal Line";
+    begin
+        Clear(RecGenJnlLineL);
+        RecGenJnlLineL.SetCurrentKey("Journal Template Name", "Journal Batch Name", "Line No.");
+        RecGenJnlLineL.SetRange("Journal Template Name", RecGenJnlLine."Journal Template Name");
+        RecGenJnlLineL.SetRange("Journal Batch Name", RecGenJnlLine."Journal Batch Name");
+        if RecGenJnlLineL.FindLast() then
+            exit(RecGenJnlLineL."Line No.")
+        else
+            exit(0);
     end;
 }

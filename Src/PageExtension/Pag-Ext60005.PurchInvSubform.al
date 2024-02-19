@@ -39,7 +39,6 @@ pageextension 60005 PurchInvSubform extends "Purch. Invoice Subform"
                     Utility: Codeunit InvestranUtility;
                 begin
                     Rec.TestField("SquareFoot Allocation", false);
-                    if not Confirm('Go ahead?', false) then exit;
                     Utility.SqareFootAllocation(Rec);
                 end;
             }

@@ -14,26 +14,29 @@ table 60006 "Square Foot Allocation Matrix"
         {
             Caption = 'Space Per Department';
             trigger OnValidate()
+            var
+                RecBuilding: Record "Building List";
             begin
-                // Rec.CalcFields("Total Space of Department");
-                // if Rec."Total Space of Department" <> 0 then
-                //     Rec."% For Cost Allocation" := (Rec."Space Per Department" / Rec."Total Space of Department") * 100
+                RecBuilding.GET("Building Name");
+                RecBuilding.CalcFields("Total Space of Department");
+                if RecBuilding."Total Space of Department" <> 0 then
+                    Rec."% For Cost Allocation" := (Rec."Space Per Department" / RecBuilding."Total Space of Department") * 100
             end;
         }
         field(3; "% For Cost Allocation"; Decimal)
         {
             Caption = '% For Cost Allocation';
         }
-        field(4; "Total Space of Department"; Decimal)
+
+        field(5; "Building Name"; Code[20])
         {
-            Caption = 'Total Space of Department';
-            FieldClass = FlowField;
-            CalcFormula = sum("Square Foot Allocation Matrix"."Space Per Department");
+            DataClassification = ToBeClassified;
+            TableRelation = "Building List";
         }
     }
     keys
     {
-        key(PK; Department)
+        key(PK; Department, "Building Name")
         {
             Clustered = true;
         }

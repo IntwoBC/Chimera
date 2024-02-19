@@ -1,4 +1,4 @@
-pageextension 60004 PurchOrderSubform extends "Purchase Order Subform"
+pageextension 60007 GenJournal extends "General Journal"
 {
     actions
     {
@@ -14,7 +14,7 @@ pageextension 60004 PurchOrderSubform extends "Purchase Order Subform"
                 begin
                     Rec.TestField("UserBased Allocation", false);
                     if not Confirm('Go ahead?', false) then exit;
-                    Utility.UserBasedAllocation(Rec);
+                    Utility.UserBasedAllocationForGenJnl(Rec);
                 end;
             }
             action("Headcount Allocation")
@@ -27,7 +27,7 @@ pageextension 60004 PurchOrderSubform extends "Purchase Order Subform"
                 begin
                     Rec.TestField("HeadCount Allocation", false);
                     if not Confirm('Go ahead?', false) then exit;
-                    Utility.HeadCountAllocation(Rec);
+                    Utility.HeadCountAllocationForGenJnl(Rec);
                 end;
             }
             action("SquareFoot Allocation")
@@ -39,7 +39,7 @@ pageextension 60004 PurchOrderSubform extends "Purchase Order Subform"
                     Utility: Codeunit InvestranUtility;
                 begin
                     Rec.TestField("SquareFoot Allocation", false);
-                    Utility.SqareFootAllocation(Rec);
+                    Utility.SqareFootAllocationForGenJnl(Rec);
                 end;
             }
 
@@ -53,7 +53,7 @@ pageextension 60004 PurchOrderSubform extends "Purchase Order Subform"
                 begin
                     Rec.TestField("Product Type Based Allocation", false);
                     if not Confirm('Go ahead?', false) then exit;
-                    Utility.ProductTypeBasedAllocation(Rec);
+                    Utility.ProductTypeBasedAllocationForGenJnl(Rec);
                 end;
             }
         }
