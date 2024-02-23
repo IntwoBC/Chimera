@@ -107,20 +107,20 @@ codeunit 60008 "Customized Workflow"
     begin
         RecRef.GetTable(Variant);
         if (RecRef.Number = Database::"Bank Acc. Reconciliation") AND (FunctionName = RunWorkflowOnCancelApproval_BRS()) Then begin
-            IF NOT WorkFlowMgmt.FindEventWorkflowStepInstance(ActionableWorkflowStepInstance, FunctionName, Variant, xVariant) THEN BEGIN
-                RecBRSHdr := Variant;
-                Clear(RecApprovalEntry);
-                RecApprovalEntry.SetRange("Table ID", Database::"Bank Acc. Reconciliation");
-                RecApprovalEntry.SetRange("Document No.", RecBRSHdr."Bank Account No.");
-                RecApprovalEntry.SetRange("Record ID to Approve", RecBRSHdr.RecordId);
-                RecApprovalEntry.SetFilter(Status, '%1|%2', RecApprovalEntry.Status::Created, RecApprovalEntry.Status::Open);
-                if RecApprovalEntry.FindSet() then
-                    RecApprovalEntry.ModifyAll(Status, RecApprovalEntry.Status::Canceled);
-                RecBRSHdr.Validate("Status", RecBRSHdr."Status"::Open);
-                RecBRSHdr.Modify();
-                Variant := RecBRSHdr;
-                Message('Bank Account Reconciliation approval request has been cancelled.');
-            END;
+            //IF NOT WorkFlowMgmt.FindEventWorkflowStepInstance(ActionableWorkflowStepInstance, FunctionName, Variant, xVariant) THEN BEGIN
+            RecBRSHdr := Variant;
+            Clear(RecApprovalEntry);
+            RecApprovalEntry.SetRange("Table ID", Database::"Bank Acc. Reconciliation");
+            RecApprovalEntry.SetRange("Document No.", RecBRSHdr."Bank Account No.");
+            RecApprovalEntry.SetRange("Record ID to Approve", RecBRSHdr.RecordId);
+            RecApprovalEntry.SetFilter(Status, '%1|%2', RecApprovalEntry.Status::Created, RecApprovalEntry.Status::Open);
+            if RecApprovalEntry.FindSet() then
+                RecApprovalEntry.ModifyAll(Status, RecApprovalEntry.Status::Canceled);
+            RecBRSHdr.Validate("Status", RecBRSHdr."Status"::Open);
+            RecBRSHdr.Modify();
+            Variant := RecBRSHdr;
+            Message('Bank Account Reconciliation approval request has been cancelled.');
+            // END;
         end;
     end;
 

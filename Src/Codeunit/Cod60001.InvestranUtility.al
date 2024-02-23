@@ -660,4 +660,86 @@ codeunit 60001 InvestranUtility
         else
             exit(0);
     end;
+
+    [EventSubscriber(ObjectType::Codeunit, Codeunit::"Bank Acc. Recon. Post (Yes/No)", OnBeforeBankAccReconPostYesNo, '', false, false)]
+    local procedure OnBeforeBankAccReconPostYesNo(var BankAccReconciliation: Record "Bank Acc. Reconciliation"; var Result: Boolean; var Handled: Boolean);
+    begin
+        BankAccReconciliation.TestField(Status, BankAccReconciliation.Status::Approved);
+    end;
+
+    [EventSubscriber(ObjectType::Codeunit, Codeunit::"Bank Acc. Reconciliation Post", OnBeforeInitPost, '', false, false)]
+    local procedure OnBeforeInitPost(var BankAccReconciliation: Record "Bank Acc. Reconciliation");
+    begin
+        BankAccReconciliation.TestField(Status, BankAccReconciliation.Status::Approved);
+    end;
+
+    [EventSubscriber(ObjectType::Codeunit, Codeunit::"Approvals Mgmt.", OnCreateApprovalRequestsOnElseCase, '', false, false)]
+    local procedure OnCreateApprovalRequestsOnElseCase(WorkflowStepArgument: Record "Workflow Step Argument"; var ApprovalEntryArgument: Record "Approval Entry");
+    var
+        RecBRS: Record "Bank Acc. Reconciliation";
+        RecBRSL: Record "Bank Acc. Reconciliation";
+        RecRef: RecordRef;
+        ApproverId: Code[50];
+        ApprovalMgmt: Codeunit "Approvals Mgmt.";
+        SequenceNo: Integer;
+        UserSetup: Record "User Setup";
+        WFUserGroupNotInSetupErr: Label 'The workflow user group member with user ID %1 does not exist in the Approval User Setup window.', Comment = 'The workflow user group member with user ID NAVUser does not exist in the Approval User Setup window.';
+
+    begin
+        if ApprovalEntryArgument."Table ID" <> Database::"Bank Acc. Reconciliation" then exit;
+        case WorkflowStepArgument."Approver Type" of
+            WorkflowStepArgument."Approver Type"::"Advanced Approval Group":
+                begin
+                    RecRef := ApprovalEntryArgument."Record ID to Approve".GetRecord();
+                    RecRef.SetTable(RecBRSL);
+                    RecBRS.SetRange("Statement Type", RecBRSL."Statement Type");
+                    RecBRS.SetRange("Bank Account No.", RecBRSL."Bank Account No.");
+                    RecBRS.SetRange("Statement No.", RecBRSL."Statement No.");
+                    RecBRS.FindFirst();
+                    RecBRS.TestField("Approver 1");
+                    RecBRS.TestField("Approver 2");
+                    RecBRS.TestField("Approver 3");
+
+                    //Approver 1
+                    ApproverId := RecBRS."Approver 1";
+                    if not UserSetup.Get(ApproverId) then
+                        Error(WFUserGroupNotInSetupErr, ApproverId);
+                    SequenceNo := ApprovalMgmt.GetLastSequenceNo(ApprovalEntryArgument);
+                    if not IsSameApproverId(ApprovalEntryArgument, ApproverId) then
+                        ApprovalMgmt.MakeApprovalEntry(ApprovalEntryArgument, SequenceNo + 1, ApproverId, WorkflowStepArgument);
+
+                    //Approver 2
+                    ApproverId := RecBRS."Approver 2";
+                    if not UserSetup.Get(ApproverId) then
+                        Error(WFUserGroupNotInSetupErr, ApproverId);
+                    SequenceNo := ApprovalMgmt.GetLastSequenceNo(ApprovalEntryArgument);
+                    if not IsSameApproverId(ApprovalEntryArgument, ApproverId) then
+                        ApprovalMgmt.MakeApprovalEntry(ApprovalEntryArgument, SequenceNo + 1, ApproverId, WorkflowStepArgument);
+
+
+                    //Approver 3
+                    ApproverId := RecBRS."Approver 3";
+                    if not UserSetup.Get(ApproverId) then
+                        Error(WFUserGroupNotInSetupErr, ApproverId);
+                    SequenceNo := ApprovalMgmt.GetLastSequenceNo(ApprovalEntryArgument);
+                    if not IsSameApproverId(ApprovalEntryArgument, ApproverId) then
+                        ApprovalMgmt.MakeApprovalEntry(ApprovalEntryArgument, SequenceNo + 1, ApproverId, WorkflowStepArgument);
+
+                end;
+        end;
+    end;
+
+    procedure IsSameApproverId(ApprovalEntryArgument: Record "Approval Entry"; ApproverId: Code[50]) Result: Boolean
+    var
+        ApprovalEntry: Record "Approval Entry";
+    begin
+        Result := false;
+        ApprovalEntry.SetCurrentKey("Record ID to Approve", "Workflow Step Instance ID", "Sequence No.");
+        ApprovalEntry.SetRange("Table ID", ApprovalEntryArgument."Table ID");
+        ApprovalEntry.SetRange("Record ID to Approve", ApprovalEntryArgument."Record ID to Approve");
+        ApprovalEntry.SetRange("Workflow Step Instance ID", ApprovalEntryArgument."Workflow Step Instance ID");
+        ApprovalEntry.SetRange("Approver ID", ApproverId);
+        if ApprovalEntry.FindFirst() then
+            Result := true;
+    end;
 }

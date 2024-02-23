@@ -9,6 +9,18 @@ pageextension 60006 BankAccReconCard extends "Bank Acc. Reconciliation"
                 ApplicationArea = All;
                 Editable = false;
             }
+            field("Approver 1"; Rec."Approver 1")
+            {
+                ApplicationArea = All;
+            }
+            field("Approver 2"; Rec."Approver 2")
+            {
+                ApplicationArea = All;
+            }
+            field("Approver 3"; Rec."Approver 3")
+            {
+                ApplicationArea = All;
+            }
         }
         modify(General)
         {
@@ -21,20 +33,6 @@ pageextension 60006 BankAccReconCard extends "Bank Acc. Reconciliation"
     }
     actions
     {
-        modify(Post)
-        {
-            trigger OnBeforeAction()
-            begin
-                Rec.TestField(Status, Rec.Status::Approved);
-            end;
-        }
-        modify(PostAndPrint)
-        {
-            trigger OnBeforeAction()
-            begin
-                Rec.TestField(Status, Rec.Status::Approved);
-            end;
-        }
         addfirst(processing)
         {
             group("Request Approval")
@@ -57,6 +55,9 @@ pageextension 60006 BankAccReconCard extends "Bank Acc. Reconciliation"
                         AdvanceWorkflowCUL: Codeunit "Customized Workflow";
                     begin
                         Rec.TestField(Status, Rec.Status::Open);
+                        Rec.TestField("Approver 1");
+                        Rec.TestField("Approver 2");
+                        Rec.TestField("Approver 3");
                         if WfInitCode.CheckWorkflowEnabled(Rec) then begin
                             WfInitCode.OnSendApproval_BRS(Rec);
                         end;
