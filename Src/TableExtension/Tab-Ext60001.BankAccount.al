@@ -2,7 +2,7 @@ tableextension 60001 BankAccount extends "Bank Account"
 {
     fields
     {
-        field(50100; "Investran Bank Mapping"; Text[250])
+        field(50100; "Investran Bank Mapping"; Text[300])
         {
             Caption = 'Investran Bank Mapping';
             DataClassification = ToBeClassified;

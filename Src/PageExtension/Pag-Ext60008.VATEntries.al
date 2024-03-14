@@ -34,10 +34,38 @@ pageextension 60008 VATEntries extends "VAT Entries"
                 Caption = 'Currency Code';
                 Editable = false;
             }
+            field("VAT Prod. Posting_Group"; Rec."VAT Prod. Posting Group")
+            {
+                ApplicationArea = All;
+                Caption = 'Type of Transaction';
+            }
+            field("Customer/vendorAddress"; "Customer/vendorAddress")
+            {
+                ApplicationArea = All;
+                Caption = 'Customer/Vendor Address';
+            }
 
         }
     }
+    actions
+    {
+        addlast(processing)
+        {
+            action("Export VAT Entries")
+            {
+                ApplicationArea = All;
+                Image = Export;
+                Promoted = true;
+                PromotedOnly = true;
+                PromotedCategory = Process;
+                RunObject = report ExportVATEntries;
+                trigger OnAction()
+                begin
 
+                end;
+            }
+        }
+    }
 
     trigger OnAfterGetRecord()
     begin
@@ -67,6 +95,7 @@ pageextension 60008 VATEntries extends "VAT Entries"
                     ExternalDocNumber := SInvHdr."External Document No.";
                     if RecCustomer.GET(SInvHdr."Sell-to Customer No.") then
                         TRNNumber := RecCustomer."VAT Registration No.";
+                    "Customer/vendorAddress" := RecCustomer.Address;
                 end;
             end else begin
                 if Rec."Document Type" = Rec."Document Type"::"Credit Memo" then begin
@@ -80,6 +109,7 @@ pageextension 60008 VATEntries extends "VAT Entries"
                         ExternalDocNumber := SCrHdr."External Document No.";
                         if RecCustomer.GET(SCrHdr."Sell-to Customer No.") then
                             TRNNumber := RecCustomer."VAT Registration No.";
+                        "Customer/vendorAddress" := RecCustomer.Address;
                     end;
                 end;
             end;
@@ -96,6 +126,7 @@ pageextension 60008 VATEntries extends "VAT Entries"
                         VendorInvNo := PurchINHdr."Vendor Invoice No.";
                         if RecVendor.GET(PurchINHdr."Buy-from Vendor No.") then
                             TRNNumber := RecVendor."VAT Registration No.";
+                        "Customer/vendorAddress" := RecVendor.Address;
                     end;
                 end else begin
                     if Rec."Document Type" = Rec."Document Type"::"Credit Memo" then begin
@@ -109,6 +140,7 @@ pageextension 60008 VATEntries extends "VAT Entries"
                             VendorInvNo := '';
                             if RecVendor.GET(PurchCrMemo."Buy-from Vendor No.") then
                                 TRNNumber := RecVendor."VAT Registration No.";
+                            "Customer/vendorAddress" := RecVendor.Address;
                         end;
                     end;
                 end;
@@ -118,17 +150,17 @@ pageextension 60008 VATEntries extends "VAT Entries"
 
     local procedure ClearVariables()
     begin
-
         clear(TRNNumber);
         clear(BillToPayToName);
         clear(VendorInvNo);
         clear(ExternalDocNumber);
         clear(CUrrencyCode);
+        Clear("Customer/vendorAddress");
     end;
 
     var
         TRNNumber: Text[20];
-        BillToPayToName: Text[100];
+        BillToPayToName, "Customer/vendorAddress" : Text[100];
         VendorInvNo: Code[35];
         ExternalDocNumber: Code[35];
         CUrrencyCode: code[10];

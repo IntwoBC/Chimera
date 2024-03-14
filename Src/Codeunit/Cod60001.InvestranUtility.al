@@ -742,4 +742,35 @@ codeunit 60001 InvestranUtility
         if ApprovalEntry.FindFirst() then
             Result := true;
     end;
+
+    [EventSubscriber(ObjectType::Table, Database::"Purchase Line", OnAfterShowDimensions, '', false, false)]
+    local procedure OnAfterShowDimensions(var PurchaseLine: Record "Purchase Line"; xPurchaseLine: Record "Purchase Line");
+    begin
+        PurchaseLine.CheckDimensionWiseBudgetForGL();
+        if PurchaseLine."Budget Exceeded" then begin
+            if not confirm('Actual amount is exceeding the budgeted amount, Do you want to proceed?', false) then
+                Error('');
+        end;
+    end;
+
+    [EventSubscriber(ObjectType::Table, Database::"Gen. Journal Line", 'OnAfterValidateEvent', 'Shortcut Dimension 2 Code', false, false)]
+    local procedure GenJnlLineOnAfterValidateShortcutDim2(var Rec: Record "Gen. Journal Line"; var xRec: Record "Gen. Journal Line"; CurrFieldNo: Integer)
+    begin
+        Rec.CheckDimensionWiseBudgetForGL();
+        if Rec."Budget Exceeded" then begin
+            if not confirm('Actual amount is exceeding the budgeted amount, Do you want to proceed?', false) then
+                Error('');
+        end;
+    end;
+
+    [EventSubscriber(ObjectType::Page, Page::"General Journal", 'OnAfterActionEvent', 'Dimensions', false, false)]
+    local procedure GenJnlLineOnAfterActionShowShortcutDim2(var Rec: Record "Gen. Journal Line")
+    begin
+        Rec.CheckDimensionWiseBudgetForGL();
+        if Rec."Budget Exceeded" then begin
+            if not confirm('Actual amount is exceeding the budgeted amount, Do you want to proceed?', false) then
+                Error('');
+        end;
+    end;
+
 }

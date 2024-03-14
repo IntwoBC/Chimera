@@ -11,6 +11,12 @@
   "url": "",
   "logo": "",
   "dependencies": [
+    {
+      "id": "bfa03093-43f1-409c-9fd5-538080f2c52b",
+      "name": "GL Source Name",
+      "publisher": "Default publisher",
+      "version": "1.0.0.0"
+    }
   ],
   "screenshots": [],
   "platform": "1.0.0.0",
