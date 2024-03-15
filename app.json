@@ -2,7 +2,7 @@
   "id": "22bc4f41-afca-4638-b907-61769868bc61",
   "name": "Chimera",
   "publisher": "InTWO",
-  "version": "1.0.0.8",
+  "version": "1.0.0.9",
   "brief": "",
   "description": "",
   "privacyStatement": "",
@@ -11,12 +11,6 @@
   "url": "",
   "logo": "",
   "dependencies": [
-    {
-      "id": "bfa03093-43f1-409c-9fd5-538080f2c52b",
-      "name": "GL Source Name",
-      "publisher": "Default publisher",
-      "version": "1.0.0.0"
-    }
   ],
   "screenshots": [],
   "platform": "1.0.0.0",

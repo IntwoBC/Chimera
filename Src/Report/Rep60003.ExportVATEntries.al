@@ -1,7 +1,7 @@
 report 60003 ExportVATEntries
 {
     Caption = 'ExportVATEntries';
-    UseRequestPage = true;
+    UseRequestPage = false;
     ProcessingOnly = true;
 
     dataset
@@ -21,13 +21,13 @@ report 60003 ExportVATEntries
                 ExcelBuf.AddColumn(VATEntry."VAT Bus. Posting Group", FALSE, '', FALSE, FALSE, FALSE, '', ExcelBuf."Cell Type"::Text);
                 ExcelBuf.AddColumn(VATEntry."VAT Prod. Posting Group", FALSE, '', FALSE, FALSE, FALSE, '', ExcelBuf."Cell Type"::Text);
                 ExcelBuf.AddColumn(VATEntry."VAT Reporting Date", FALSE, '', FALSE, FALSE, FALSE, '', ExcelBuf."Cell Type"::Text);
-                ExcelBuf.AddColumn(VATEntry."Posting Date", FALSE, '', FALSE, FALSE, FALSE, '', ExcelBuf."Cell Type"::Text);
+                ExcelBuf.AddColumn(VATEntry."Posting Date", FALSE, '', FALSE, FALSE, FALSE, '', ExcelBuf."Cell Type"::Date);
                 ExcelBuf.AddColumn(VATEntry."Document No.", FALSE, '', FALSE, FALSE, FALSE, '', ExcelBuf."Cell Type"::Text);
                 ExcelBuf.AddColumn(VATEntry."Document Type", FALSE, '', FALSE, FALSE, FALSE, '', ExcelBuf."Cell Type"::Text);
                 ExcelBuf.AddColumn(VATEntry.Type, FALSE, '', FALSE, FALSE, FALSE, '', ExcelBuf."Cell Type"::Text);
                 GetTotalAmountBaseAmt(VATEntry."Document No.", VATEntry."Posting Date", Amt, BaseAmt);
-                ExcelBuf.AddColumn(BaseAmt, FALSE, '', FALSE, FALSE, FALSE, '', ExcelBuf."Cell Type"::Text);
-                ExcelBuf.AddColumn(Amt, FALSE, '', FALSE, FALSE, FALSE, '', ExcelBuf."Cell Type"::Text);
+                ExcelBuf.AddColumn(BaseAmt, FALSE, '', FALSE, FALSE, FALSE, '', ExcelBuf."Cell Type"::Number);
+                ExcelBuf.AddColumn(Amt, FALSE, '', FALSE, FALSE, FALSE, '', ExcelBuf."Cell Type"::Number);
                 ExcelBuf.AddColumn(VATEntry."VAT Calculation Type", FALSE, '', FALSE, FALSE, FALSE, '', ExcelBuf."Cell Type"::Text);
                 ExcelBuf.AddColumn(VATEntry."Bill-to/Pay-to No.", FALSE, '', FALSE, FALSE, FALSE, '', ExcelBuf."Cell Type"::Text);
                 ExcelBuf.AddColumn(VATEntry."Country/Region Code", FALSE, '', FALSE, FALSE, FALSE, '', ExcelBuf."Cell Type"::Text);
@@ -46,13 +46,13 @@ report 60003 ExportVATEntries
                 ExcelBuf.AddColumn(ExternalDocNumber, FALSE, '', FALSE, FALSE, FALSE, '', ExcelBuf."Cell Type"::Text);
                 ExcelBuf.AddColumn(CUrrencyCode, FALSE, '', FALSE, FALSE, FALSE, '', ExcelBuf."Cell Type"::Text);
                 ExcelBuf.AddColumn(Desc, FALSE, '', FALSE, FALSE, FALSE, '', ExcelBuf."Cell Type"::Text);
-                ExcelBuf.AddColumn(RecCurrEchRate.ExchangeAmount(Amt, GenLedgSetup."LCY Code", CUrrencyCode, VATEntry."Posting Date"), FALSE, '', FALSE, FALSE, FALSE, '', ExcelBuf."Cell Type"::Text);
-                ExcelBuf.AddColumn(RecCurrEchRate.ExchangeAmount(BaseAmt, GenLedgSetup."LCY Code", CUrrencyCode, VATEntry."Posting Date"), FALSE, '', FALSE, FALSE, FALSE, '', ExcelBuf."Cell Type"::Text);
+                ExcelBuf.AddColumn(RecCurrEchRate.ExchangeAmount(Amt, GenLedgSetup."LCY Code", CUrrencyCode, VATEntry."Posting Date"), FALSE, '', FALSE, FALSE, FALSE, '', ExcelBuf."Cell Type"::Number);
+                ExcelBuf.AddColumn(RecCurrEchRate.ExchangeAmount(BaseAmt, GenLedgSetup."LCY Code", CUrrencyCode, VATEntry."Posting Date"), FALSE, '', FALSE, FALSE, FALSE, '', ExcelBuf."Cell Type"::Number);
                 ExcelBuf.AddColumn(VATEntry."VAT Prod. Posting Group", FALSE, '', FALSE, FALSE, FALSE, '', ExcelBuf."Cell Type"::Text);
                 ExcelBuf.AddColumn(Paid, FALSE, '', FALSE, FALSE, FALSE, '', ExcelBuf."Cell Type"::Text);
                 ExcelBuf.AddColumn("Customer/vendorAddress", FALSE, '', FALSE, FALSE, FALSE, '', ExcelBuf."Cell Type"::Text);
                 ExcelBuf.AddColumn(Discount, FALSE, '', FALSE, FALSE, FALSE, '', ExcelBuf."Cell Type"::Text);
-                ExcelBuf.AddColumn(DocumentDate, FALSE, '', FALSE, FALSE, FALSE, '', ExcelBuf."Cell Type"::Text);
+                ExcelBuf.AddColumn(DocumentDate, FALSE, '', FALSE, FALSE, FALSE, '', ExcelBuf."Cell Type"::Date);
             end;
         }
     }
@@ -108,8 +108,8 @@ report 60003 ExportVATEntries
         ExcelBuf.AddColumn('External Document No.', FALSE, '', TRUE, FALSE, TRUE, '', ExcelBuf."Cell Type"::Text);
         ExcelBuf.AddColumn('Currency Code', FALSE, '', TRUE, FALSE, TRUE, '', ExcelBuf."Cell Type"::Text);
         ExcelBuf.AddColumn('Description', FALSE, '', TRUE, FALSE, TRUE, '', ExcelBuf."Cell Type"::Text);
-        ExcelBuf.AddColumn('Amount' + '(' + CUrrencyCode + ')', FALSE, '', TRUE, FALSE, TRUE, '', ExcelBuf."Cell Type"::Text);
-        ExcelBuf.AddColumn('Base Amount' + '(' + CUrrencyCode + ')', FALSE, '', TRUE, FALSE, TRUE, '', ExcelBuf."Cell Type"::Text);
+        ExcelBuf.AddColumn('Amount' + '(Inv. Currency)', FALSE, '', TRUE, FALSE, TRUE, '', ExcelBuf."Cell Type"::Text);
+        ExcelBuf.AddColumn('Base Amount' + '(Inv. Currency)', FALSE, '', TRUE, FALSE, TRUE, '', ExcelBuf."Cell Type"::Text);
         ExcelBuf.AddColumn('Type of Transaction', FALSE, '', TRUE, FALSE, TRUE, '', ExcelBuf."Cell Type"::Text);
         ExcelBuf.AddColumn('Paid/Unpaid', FALSE, '', TRUE, FALSE, TRUE, '', ExcelBuf."Cell Type"::Text);
         ExcelBuf.AddColumn('Customer/Vendor Address', FALSE, '', TRUE, FALSE, TRUE, '', ExcelBuf."Cell Type"::Text);
