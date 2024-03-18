@@ -38,27 +38,7 @@ tableextension 60003 PurchLine extends "Purchase Line"
                 CheckDimensionWiseBudgetForGL();
             end;
         }
-        modify(Quantity)
-        {
-            trigger OnAfterValidate()
-            begin
-                CheckDimensionWiseBudgetForGL();
-            end;
-        }
-        modify("Direct Unit Cost")
-        {
-            trigger OnAfterValidate()
-            begin
-                CheckDimensionWiseBudgetForGL();
-            end;
-        }
-        modify("Amount Including VAT")
-        {
-            trigger OnAfterValidate()
-            begin
-                CheckDimensionWiseBudgetForGL();
-            end;
-        }
+
         modify("Shortcut Dimension 2 Code")
         {
             trigger OnAfterValidate()

@@ -1,7 +1,7 @@
 report 60003 ExportVATEntries
 {
-    Caption = 'ExportVATEntries';
-    UseRequestPage = false;
+    Caption = 'Export VAT Entries';
+    UseRequestPage = true;
     ProcessingOnly = true;
 
     dataset
@@ -9,6 +9,7 @@ report 60003 ExportVATEntries
         dataitem(VATEntry; "VAT Entry")
         {
             DataItemTableView = sorting("Entry No.") order(descending) where("Document Type" = filter(<> ' '));
+            RequestFilterFields = "Posting Date";
             trigger OnAfterGetRecord()
             var
                 Amt, BaseAmt : Decimal;
