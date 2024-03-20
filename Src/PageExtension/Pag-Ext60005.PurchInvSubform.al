@@ -1,5 +1,21 @@
 pageextension 60005 PurchInvSubform extends "Purch. Invoice Subform"
 {
+    layout
+    {
+        addlast(PurchDetailLine)
+        {
+            field("Amount Inc. VAT LCY"; Rec."Amount Inc. VAT LCY")
+            {
+                ApplicationArea = All;
+                Editable = false;
+            }
+            field("Budget Exceeded"; Rec."Budget Exceeded")
+            {
+                ApplicationArea = All;
+                Editable = false;
+            }
+        }
+    }
     actions
     {
         addafter(Dimensions)

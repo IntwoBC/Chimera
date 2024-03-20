@@ -1,5 +1,21 @@
 pageextension 60004 PurchOrderSubform extends "Purchase Order Subform"
 {
+    layout
+    {
+        addlast(Control1)
+        {
+            field("Amount Inc. VAT LCY"; Rec."Amount Inc. VAT LCY")
+            {
+                ApplicationArea = All;
+                Editable = false;
+            }
+            field("Budget Exceeded"; Rec."Budget Exceeded")
+            {
+                ApplicationArea = All;
+                Editable = false;
+            }
+        }
+    }
     actions
     {
         addafter(Dimensions)

@@ -99,7 +99,22 @@ tableextension 60005 GenJnlLine extends "Gen. Journal Line"
         RecGLBudgetEntry.SetRange(Date, CALCDATE('<-CY>', Rec."Posting Date"), CALCDATE('<CY>', Rec."Posting Date"));
         if RecGLBudgetEntry.FindSet() then begin
             RecGLBudgetEntry.CalcSums(Amount);
-            exit(RecGLBudgetEntry.Amount);
+            exit(RecGLBudgetEntry.Amount - GetActualAmountFromGL());
+        end else
+            exit(0);
+    end;
+
+    local procedure GetActualAmountFromGL(): Decimal
+    var
+        RecGLEntry: Record "G/L Entry";
+    begin
+        clear(RecGLEntry);
+        RecGLEntry.SetRange("G/L Account No.", Rec."Account No.");
+        RecGLEntry.SetRange("Global Dimension 2 Code", Rec."Shortcut Dimension 2 Code");
+        RecGLEntry.SetRange("Posting Date", CALCDATE('<-CY>', Rec."Posting Date"), CALCDATE('<CY>', Rec."Posting Date"));
+        if RecGLEntry.FindSet() then begin
+            RecGLEntry.CalcSums(Amount);
+            exit(RecGLEntry.Amount);
         end else
             exit(0);
     end;

@@ -31,6 +31,10 @@ tableextension 60003 PurchLine extends "Purchase Line"
         {
             DataClassification = ToBeClassified;
         }
+        field(60006; "Amount Inc. VAT LCY"; Decimal)
+        {
+            DataClassification = ToBeClassified;
+        }
         modify("No.")
         {
             trigger OnAfterValidate()
@@ -53,6 +57,10 @@ tableextension 60003 PurchLine extends "Purchase Line"
     }
 
     internal procedure CheckDimensionWiseBudgetForGL()
+    var
+        CurrencyExchRate: Record "Currency Exchange Rate";
+        Phdr: Record "Purchase Header";
+        GenLedgSetup: Record "General Ledger Setup";
     begin
         if NOT (Rec."Document Type" IN [Rec."Document Type"::Order, Rec."Document Type"::Invoice]) then begin
             Rec."Budget Exceeded" := false;
@@ -71,8 +79,10 @@ tableextension 60003 PurchLine extends "Purchase Line"
             Rec."Budget Exceeded" := false;
             exit;
         end;
-
-        if Rec."Amount Including VAT" > GetBudgetedAmount() then
+        GenLedgSetup.GET;
+        Phdr := rec.GetPurchHeader();
+        Rec."Amount Inc. VAT LCY" := CurrencyExchRate.ExchangeAmount("Amount Including VAT", Phdr."Currency Code", GenLedgSetup."LCY Code", Phdr."Posting Date");
+        if Rec."Amount Inc. VAT LCY" > GetBudgetedAmount() then
             "Budget Exceeded" := true
         else
             "Budget Exceeded" := false;
@@ -91,7 +101,24 @@ tableextension 60003 PurchLine extends "Purchase Line"
         RecGLBudgetEntry.SetRange(Date, CALCDATE('<-CY>', Phdr."Posting Date"), CALCDATE('<CY>', Phdr."Posting Date"));
         if RecGLBudgetEntry.FindSet() then begin
             RecGLBudgetEntry.CalcSums(Amount);
-            exit(RecGLBudgetEntry.Amount);
+            exit(RecGLBudgetEntry.Amount - GetActualAmountFromGL());
+        end else
+            exit(0);
+    end;
+
+    local procedure GetActualAmountFromGL(): Decimal
+    var
+        RecGLEntry: Record "G/L Entry";
+        Phdr: Record "Purchase Header";
+    begin
+        Phdr := rec.GetPurchHeader();
+        clear(RecGLEntry);
+        RecGLEntry.SetRange("G/L Account No.", Rec."No.");
+        RecGLEntry.SetRange("Global Dimension 2 Code", Rec."Shortcut Dimension 2 Code");
+        RecGLEntry.SetRange("Posting Date", CALCDATE('<-CY>', Phdr."Posting Date"), CALCDATE('<CY>', Phdr."Posting Date"));
+        if RecGLEntry.FindSet() then begin
+            RecGLEntry.CalcSums(Amount);
+            exit(RecGLEntry.Amount);
         end else
             exit(0);
     end;
