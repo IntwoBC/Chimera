@@ -27,6 +27,7 @@ tableextension 60003 PurchLine extends "Purchase Line"
             Caption = 'Product Type Based Allocation';
             DataClassification = ToBeClassified;
         }
+        //Need to remove from live
         field(60005; "Budget Exceeded"; Boolean)
         {
             DataClassification = ToBeClassified;
@@ -55,6 +56,7 @@ tableextension 60003 PurchLine extends "Purchase Line"
             end;
         }
     }
+    //Need to remove from live
 
     internal procedure CheckDimensionWiseBudgetForGL()
     var
@@ -122,4 +124,5 @@ tableextension 60003 PurchLine extends "Purchase Line"
         end else
             exit(0);
     end;
+
 }

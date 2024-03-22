@@ -2,7 +2,7 @@ tableextension 60002 "GL Account" extends "G/L Account"
 {
     fields
     {
-        field(50100; "Investran Code Mapping"; code[50])
+        field(50100; "Investran Code Mapping"; code[300])
         {
             Caption = 'Investran Code Mapping';
             DataClassification = ToBeClassified;

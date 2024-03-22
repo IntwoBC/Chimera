@@ -1,9 +1,11 @@
 pageextension 60005 PurchInvSubform extends "Purch. Invoice Subform"
 {
+    //Need to remove from live
     layout
     {
         addlast(PurchDetailLine)
         {
+
             field("Amount Inc. VAT LCY"; Rec."Amount Inc. VAT LCY")
             {
                 ApplicationArea = All;

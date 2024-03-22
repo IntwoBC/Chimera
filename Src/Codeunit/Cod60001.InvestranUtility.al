@@ -743,6 +743,7 @@ codeunit 60001 InvestranUtility
             Result := true;
     end;
 
+    //Need to remove from live
     [EventSubscriber(ObjectType::Table, Database::"Purchase Line", OnAfterShowDimensions, '', false, false)]
     local procedure OnAfterShowDimensions(var PurchaseLine: Record "Purchase Line"; xPurchaseLine: Record "Purchase Line");
     begin

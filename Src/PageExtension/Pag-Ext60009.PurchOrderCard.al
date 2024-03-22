@@ -1,5 +1,6 @@
 pageextension 60009 PurchOrderCard extends "Purchase Order"
 {
+    //Need to remove from live
     layout
     {
         addlast(General)

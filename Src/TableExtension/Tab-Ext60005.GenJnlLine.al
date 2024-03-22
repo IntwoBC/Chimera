@@ -27,6 +27,7 @@ tableextension 60005 GenJnlLine extends "Gen. Journal Line"
             Caption = 'Product Type Based Allocation';
             DataClassification = ToBeClassified;
         }
+        //Need to remove from live
         field(60005; "Budget Exceeded"; Boolean)
         {
             DataClassification = ToBeClassified;
@@ -65,6 +66,7 @@ tableextension 60005 GenJnlLine extends "Gen. Journal Line"
             end;
         }
     }
+
     internal procedure CheckDimensionWiseBudgetForGL()
     begin
         if Rec."Account Type" <> Rec."Account Type"::"G/L Account" then begin
@@ -118,4 +120,5 @@ tableextension 60005 GenJnlLine extends "Gen. Journal Line"
         end else
             exit(0);
     end;
+
 }
